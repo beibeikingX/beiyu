@@ -6,7 +6,7 @@ export async function onRequest(context) {
         return new Response(null, {
             headers: {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
                 'Access-Control-Allow-Headers': 'Content-Type',
             },
         });
@@ -31,6 +31,18 @@ export async function onRequest(context) {
             }
             await env.DB.prepare('INSERT INTO album (src, desc) VALUES (?, ?)')
                      .bind(src, desc || '未命名图片')
+                     .run();
+            return new Response(JSON.stringify({ success: true }), { headers });
+        }
+
+        if (method === 'PUT') {
+            const body = await request.json();
+            const { id, src, desc } = body;
+            if (!id || !src) {
+                return new Response(JSON.stringify({ error: '缺少 ID 或图片链接为空' }), { status: 400, headers });
+            }
+            await env.DB.prepare('UPDATE album SET src = ?, desc = ? WHERE id = ?')
+                     .bind(src, desc || '未命名图片', id)
                      .run();
             return new Response(JSON.stringify({ success: true }), { headers });
         }
