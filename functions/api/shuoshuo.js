@@ -6,7 +6,7 @@ export async function onRequest(context) {
         return new Response(null, {
             headers: {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
                 'Access-Control-Allow-Headers': 'Content-Type',
             },
         });
@@ -31,6 +31,18 @@ export async function onRequest(context) {
             }
             await env.DB.prepare('INSERT INTO shuoshuo (text, img, time) VALUES (?, ?, ?)')
                      .bind(text, img || null, time)
+                     .run();
+            return new Response(JSON.stringify({ success: true }), { headers });
+        }
+
+        if (method === 'PUT') {
+            const body = await request.json();
+            const { id, text, img } = body;
+            if (!id || !text) {
+                return new Response(JSON.stringify({ error: '缺少 ID 或内容为空' }), { status: 400, headers });
+            }
+            await env.DB.prepare('UPDATE shuoshuo SET text = ?, img = ? WHERE id = ?')
+                     .bind(text, img || null, id)
                      .run();
             return new Response(JSON.stringify({ success: true }), { headers });
         }
