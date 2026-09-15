@@ -148,6 +148,434 @@
             </div>
         </div>
 
+        <!-- 说说视图（普通用户：无删除按钮） -->
+        <div id="shuoshuo-view" class="hidden">
+            <div class="flex items-center gap-4 mb-6">
+                <button onclick="switchTab('home')" class="glass px-4 py-2 rounded-full flex items-center gap-2 hover:bg-white dark:hover:bg-gray-700 transition text-sm text-gray-600 dark:text-gray-300">
+                    <i class="fas fa-arrow-left"></i> 返回首页
+                </button>
+                <h3 class="text-xl font-bold pl-2 border-l-4 border-blue-500">说说</h3>
+            </div>
+            <div id="shuoshuo-list" class="space-y-4"></div>
+        </div>
+
+        <!-- 相册视图（普通用户：无删除按钮） -->
+        <div id="album-view" class="hidden">
+            <div class="flex items-center gap-4 mb-6">
+                <button onclick="switchTab('home')" class="glass px-4 py-2 rounded-full flex items-center gap-2 hover:bg-white dark:hover:bg-gray-700 transition text-sm text-gray-600 dark:text-gray-300">
+                    <i class="fas fa-arrow-left"></i> 返回首页
+                </button>
+                <h3 class="text-xl font-bold pl-2 border-l-4 border-blue-500">相册</h3>
+            </div>
+            <div id="album-list" class="columns-1 sm:columns-2 md:columns-3 gap-4 space-y-4"></div>
+        </div>
+
+        <!-- 后台管理视图 -->
+        <div id="admin-view" class="hidden">
+            <div class="flex items-center gap-4 mb-6">
+                <button onclick="switchTab('home')" class="glass px-4 py-2 rounded-full flex items-center gap-2 hover:bg-white dark:hover:bg-gray-700 transition text-sm text-gray-600 dark:text-gray-300">
+                    <i class="fas fa-arrow-left"></i> 返回首页
+                </button>
+                <h3 class="text-xl font-bold pl-2 border-l-4 border-red-500">后台管理</h3>
+            </div>
+
+            <!-- 登录模块 -->
+            <div id="admin-login" class="glass rounded-3xl p-8 max-w-md mx-auto">
+                <div class="text-center mb-6">
+                    <svg class="w-32 h-32 mx-auto mb-4 text-gray-400 dark:text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 4.5a4 4 0 1 0 0 8 4 4 0 1 0 0-8Z" />
+                        <path d="M4.5 20a7.5 7.5 0 0 1 15 0" />
+                    </svg>
+                    <h4 class="text-lg font-bold">请输入管理员账号密码</h4>
+                </div>
+                <div class="space-y-4">
+                    <input type="text" id="admin-username" placeholder="请输入账号" class="w-full glass border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 outline-none focus:border-blue-500 transition bg-transparent">
+                    <input type="password" id="admin-password" placeholder="请输入密码" class="w-full glass border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 outline-none focus:border-blue-500 transition bg-transparent">
+                    <button onclick="handleLogin()" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-blue-500/30">登录后台</button>
+                </div>
+            </div>
+
+            <!-- 管理主界面 -->
+            <div id="admin-main" class="hidden">
+                <!-- 发布与添加区 -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="glass rounded-3xl p-6">
+                        <h4 class="font-bold mb-4 flex items-center"><i class="fas fa-plus-circle text-blue-500 mr-2"></i>发布说说</h4>
+                        <textarea id="new-shuoshuo-text" rows="3" placeholder="今天心情怎么样..." class="w-full glass border border-gray-300 dark:border-gray-600 rounded-xl p-3 outline-none focus:border-blue-500 transition bg-transparent mb-3 resize-none"></textarea>
+                        <input type="url" id="new-shuoshuo-img" placeholder="配图链接 (可选，如 https://...)" class="w-full glass border border-gray-300 dark:border-gray-600 rounded-xl px-3 py-2 outline-none focus:border-blue-500 transition bg-transparent mb-4 text-sm">
+                        <button onclick="addShuoshuo()" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 rounded-xl transition">立即发布</button>
+                    </div>
+                    <div class="glass rounded-3xl p-6">
+                        <h4 class="font-bold mb-4 flex items-center"><i class="fas fa-image text-purple-500 mr-2"></i>添加相册图片</h4>
+                        <input type="url" id="new-album-img" placeholder="图片链接 (必填，如 https://...)" class="w-full glass border border-gray-300 dark:border-gray-600 rounded-xl px-3 py-2 outline-none focus:border-purple-500 transition bg-transparent mb-3">
+                        <input type="text" id="new-album-desc" placeholder="图片描述 (如：风景与自然)" class="w-full glass border border-gray-300 dark:border-gray-600 rounded-xl px-3 py-2 outline-none focus:border-purple-500 transition bg-transparent mb-4">
+                        <button onclick="addAlbum()" class="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 rounded-xl transition">添加图片</button>
+                    </div>
+                </div>
+
+                <!-- 内容管理区（只有后台才有的删除功能） -->
+                <h4 class="font-bold mt-10 mb-4 pl-2 border-l-4 border-red-500 flex items-center"><i class="fas fa-tasks mr-2"></i>内容管理</h4>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- 后台管理说说列表 -->
+                    <div class="glass rounded-3xl p-6">
+                        <h4 class="font-bold mb-4 flex items-center justify-between">
+                            <span><i class="fas fa-comment text-blue-500 mr-2"></i>管理说说</span>
+                            <span class="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded-full text-gray-500">仅后台可删</span>
+                        </h4>
+                        <div id="admin-shuoshuo-list" class="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                            <!-- 由 JS 动态渲染，带删除按钮 -->
+                        </div>
+                    </div>
+                    <!-- 后台管理相册列表 -->
+                    <div class="glass rounded-3xl p-6">
+                        <h4 class="font-bold mb-4 flex items-center justify-between">
+                            <span><i class="fas fa-image text-purple-500 mr-2"></i>管理相册</span>
+                            <span class="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded-full text-gray-500">仅后台可删</span>
+                        </h4>
+                        <div id="admin-album-list" class="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                            <!-- 由 JS 动态渲染，带删除按钮 -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-8">
+                    <button onclick="logout()" class="text-red-400 hover:text-red-500 text-sm font-medium"><i class="fas fa-sign-out-alt mr-1"></i> 退出登录</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 悬浮窗音乐播放器 -->
+    <div id="music-widget" class="collapsed glass fixed right-4 bottom-20 z-[90] cursor-pointer" onclick="toggleWidget(event)">
+        <div class="collapsed-icon text-blue-500 dark:text-blue-400 text-2xl flex items-center justify-center">
+            <i class="fas fa-music"></i>
+        </div>
+        <div class="widget-content w-full">
+            <div class="widget-header flex justify-between items-center px-4 pt-4 pb-2">
+                <span class="text-xs font-bold text-gray-500 dark:text-gray-400 tracking-wider">CLOUD MUSIC</span>
+                <i class="fas fa-times cursor-pointer text-gray-400 hover:text-red-400 transition" onclick="toggleWidget(event)"></i>
+            </div>
+            <div class="px-1 pb-1">
+                <meting-js
+                    api="https://api.injahow.cn/meting/?server=:server&type=:type&id=:id"
+                    server="netease" type="playlist" id="3778678" 
+                    fixed="false" mini="false" autoplay="false" theme="#3b82f6" loop="all" order="list" preload="auto" mutex="true" lrc-type="0">
+                </meting-js>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // 1. 数据渲染逻辑（对接 D1 数据库 API）
+        // ============================================================
+        
+        // 渲染说说（公开，无删除按钮）
+        async function renderShuoshuo() {
+            const container = document.getElementById('shuoshuo-list');
+            container.innerHTML = '<div class="glass rounded-2xl p-6 text-center text-gray-500">加载中...</div>';
+            try {
+                const response = await fetch('/api/shuoshuo');
+                const data = await response.json();
+                
+                if (data.length === 0) {
+                    container.innerHTML = '<div class="glass rounded-2xl p-6 text-center text-gray-500">暂无说说~</div>';
+                    return;
+                }
+                
+                container.innerHTML = '';
+                data.forEach((item) => {
+                    let html = `
+                        <div class="glass rounded-2xl p-6 hover-lift relative group">
+                            <div class="flex items-center space-x-3 mb-3">
+                                <img src="https://q1.qlogo.cn/g?b=qq&nk=1779180196&s=100" referrerpolicy="no-referrer" class="w-10 h-10 rounded-full bg-white dark:bg-gray-800">
+                                <div><div class="font-bold">北宇</div><div class="text-xs text-gray-500 dark:text-gray-400">${item.time}</div></div>
+                            </div>
+                            <p class="text-gray-700 dark:text-gray-300 text-sm mb-3 whitespace-pre-wrap">${item.text}</p>
+                    `;
+                    if (item.img) {
+                        html += `<img src="${item.img}" class="rounded-xl max-w-xs w-full object-cover">`;
+                    }
+                    // 注意：这里没有删除按钮了！
+                    html += `</div>`;
+                    container.innerHTML += html;
+                });
+            } catch (error) {
+                container.innerHTML = '<div class="glass rounded-2xl p-6 text-center text-red-400">加载失败，请稍后重试</div>';
+            }
+        }
+
+        // 渲染相册（公开，无删除按钮）
+        async function renderAlbum() {
+            const container = document.getElementById('album-list');
+            container.innerHTML = '<div class="glass rounded-2xl p-6 text-center text-gray-500 w-full col-span-3">加载中...</div>';
+            try {
+                const response = await fetch('/api/album');
+                const data = await response.json();
+                
+                if (data.length === 0) {
+                    container.innerHTML = '<div class="glass rounded-2xl p-6 text-center text-gray-500 w-full col-span-3">暂无照片~</div>';
+                    return;
+                }
+                
+                container.innerHTML = '';
+                data.forEach((item) => {
+                    let html = `
+                        <div class="glass rounded-2xl overflow-hidden hover-lift break-inside-avoid relative group">
+                            <img src="${item.src}" class="w-full" onerror="this.src='https://via.placeholder.com/400x300?text=Image+Error'">
+                            <div class="p-3 text-sm text-center text-gray-600 dark:text-gray-400">${item.desc}</div>
+                        </div>
+                    `;
+                    // 注意：这里也没有删除按钮了！
+                    container.innerHTML += html;
+                });
+            } catch (error) {
+                container.innerHTML = '<div class="glass rounded-2xl p-6 text-center text-red-400 w-full col-span-3">加载失败，请稍后重试</div>';
+            }
+        }
+
+        // 渲染后台管理列表（专供后台，带删除按钮）
+        async function renderAdminLists() {
+            // 后台说说列表
+            const adminShuoshuoContainer = document.getElementById('admin-shuoshuo-list');
+            adminShuoshuoContainer.innerHTML = '<div class="text-center text-gray-500 text-sm py-4">加载中...</div>';
+            try {
+                const resShuoshuo = await fetch('/api/shuoshuo');
+                const dataShuoshuo = await resShuoshuo.json();
+                if (dataShuoshuo.length === 0) {
+                    adminShuoshuoContainer.innerHTML = '<div class="text-center text-gray-500 text-sm py-4">暂无说说</div>';
+                } else {
+                    adminShuoshuoContainer.innerHTML = '';
+                    dataShuoshuo.forEach(item => {
+                        let html = `
+                            <div class="flex justify-between items-center bg-white/30 dark:bg-black/20 p-3 rounded-xl border border-white/40 dark:border-white/10">
+                                <div class="flex-1 min-w-0 pr-3">
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">${item.time}</div>
+                                    <div class="text-sm truncate">${item.text}</div>
+                                </div>
+                                <button onclick="deleteShuoshuo(${item.id})" class="shrink-0 bg-red-100 hover:bg-red-200 dark:bg-red-900/50 dark:hover:bg-red-900 text-red-500 w-8 h-8 rounded-full flex items-center justify-center transition">
+                                    <i class="fas fa-trash-alt text-xs"></i>
+                                </button>
+                            </div>
+                        `;
+                        adminShuoshuoContainer.innerHTML += html;
+                    });
+                }
+            } catch(e) {
+                adminShuoshuoContainer.innerHTML = '<div class="text-center text-red-400 text-sm py-4">加载失败</div>';
+            }
+
+            // 后台相册列表
+            const adminAlbumContainer = document.getElementById('admin-album-list');
+            adminAlbumContainer.innerHTML = '<div class="text-center text-gray-500 text-sm py-4">加载中...</div>';
+            try {
+                const resAlbum = await fetch('/api/album');
+                const dataAlbum = await resAlbum.json();
+                if (dataAlbum.length === 0) {
+                    adminAlbumContainer.innerHTML = '<div class="text-center text-gray-500 text-sm py-4">暂无图片</div>';
+                } else {
+                    adminAlbumContainer.innerHTML = '';
+                    dataAlbum.forEach(item => {
+                        let html = `
+                            <div class="flex items-center gap-3 bg-white/30 dark:bg-black/20 p-2 rounded-xl border border-white/40 dark:border-white/10">
+                                <img src="${item.src}" class="w-10 h-10 rounded-lg object-cover shrink-0" onerror="this.src='https://via.placeholder.com/100?text=Img'">
+                                <div class="flex-1 min-w-0">
+                                    <div class="text-sm truncate">${item.desc}</div>
+                                </div>
+                                <button onclick="deleteAlbum(${item.id})" class="shrink-0 bg-red-100 hover:bg-red-200 dark:bg-red-900/50 dark:hover:bg-red-900 text-red-500 w-8 h-8 rounded-full flex items-center justify-center transition">
+                                    <i class="fas fa-trash-alt text-xs"></i>
+                                </button>
+                            </div>
+                        `;
+                        adminAlbumContainer.innerHTML += html;
+                    });
+                }
+            } catch(e) {
+                adminAlbumContainer.innerHTML = '<div class="text-center text-red-400 text-sm py-4">加载失败</div>';
+            }
+        }
+
+        // ============================================================
+        // 2. 删除逻辑（供后台调用）
+        // ============================================================
+        async function deleteShuoshuo(id) {
+            if(!confirm('确定删除这条说说吗？')) return;
+            try {
+                const res = await fetch(`/api/shuoshuo?id=${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    alert('删除成功！');
+                    renderAdminLists(); // 刷新后台列表
+                    renderShuoshuo();    // 刷新公开列表
+                } else {
+                    const data = await res.json();
+                    alert('删除失败：' + (data.error || '服务器错误'));
+                }
+            } catch (e) {
+                alert('网络错误：' + e.message);
+            }
+        }
+
+        async function deleteAlbum(id) {
+            if(!confirm('确定删除这张照片吗？')) return;
+            try {
+                const res = await fetch(`/api/album?id=${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    alert('删除成功！');
+                    renderAdminLists(); // 刷新后台列表
+                    renderAlbum();      // 刷新公开列表
+                } else {
+                    const data = await res.json();
+                    alert('删除失败：' + (data.error || '服务器错误'));
+                }
+            } catch (e) {
+                alert('网络错误：' + e.message);
+            }
+        }
+
+        // ============================================================
+        // 3. 添加逻辑（对接 API）
+        // ============================================================
+        async function addShuoshuo() {
+            const text = document.getElementById('new-shuoshuo-text').value.trim();
+            const img = document.getElementById('new-shuoshuo-img').value.trim();
+            if (!text) return alert('请输入说说内容');
+
+            const now = new Date();
+            const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+            await fetch('/api/shuoshuo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text, img: img || null, time: timeStr })
+            });
+            
+            document.getElementById('new-shuoshuo-text').value = '';
+            document.getElementById('new-shuoshuo-img').value = '';
+            alert('发布成功！');
+            renderAdminLists();
+            renderShuoshuo();
+        }
+
+        async function addAlbum() {
+            const img = document.getElementById('new-album-img').value.trim();
+            const desc = document.getElementById('new-album-desc').value.trim();
+            if (!img) return alert('请输入图片链接');
+
+            await fetch('/api/album', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ src: img, desc: desc || '未命名图片' })
+            });
+
+            document.getElementById('new-album-img').value = '';
+            document.getElementById('new-album-desc').value = '';
+            alert('添加成功！');
+            renderAdminLists();
+            renderAlbum();
+        }
+
+        // ============================================================
+        // 4. 后台管理逻辑
+        // ============================================================
+        function handleLogin() {
+            const user = document.getElementById('admin-username').value;
+            const pass = document.getElementById('admin-password').value;
+            if (user === 'admin' && pass === '1677554758a') {
+                document.getElementById('admin-login').classList.add('hidden');
+                document.getElementById('admin-main').classList.remove('hidden');
+                renderAdminLists(); // 登录成功后加载后台管理列表
+                alert('登录成功！');
+            } else {
+                alert('账号或密码错误！');
+            }
+        }
+
+        function logout() {
+            document.getElementById('admin-login').classList.remove('hidden');
+            document.getElementById('admin-main').classList.add('hidden');
+            document.getElementById('admin-username').value = '';
+            document.getElementById('admin-password').value = '';
+            switchTab('home');
+        }
+
+        // ============================================================
+        // 5. 一言文案 API
+        // ============================================================
+        function fetchHitokoto() {
+            const textElement = document.getElementById('hitokoto-text');
+            if (!textElement) return;
+            textElement.textContent = '正在获取文案...';
+            fetch('https://v1.hitokoto.cn/')
+                .then(response => response.json())
+                .then(data => {
+                    const source = data.from ? ` —— ${data.from}` : '';
+                    textElement.textContent = `${data.hitokoto}${source}`;
+                })
+                .catch(error => {
+                    textElement.textContent = '网络开小差了，点击重试~';
+                });
+        }
+
+        // ============================================================
+        // 6. 页面切换与交互动画
+        // ============================================================
+        function switchTab(viewName) {
+            ['home', 'shuoshuo', 'album', 'admin'].forEach(v => {
+                const el = document.getElementById(v + '-view');
+                if (el) { el.classList.add('hidden'); el.classList.remove('block'); }
+            });
+            const target = document.getElementById(viewName + '-view');
+            if (target) { target.classList.remove('hidden'); target.classList.add('block'); }
+            window.scrollTo({top: 0, behavior: 'smooth'});
+
+            if (viewName === 'shuoshuo') renderShuoshuo();
+            if (viewName === 'album') renderAlbum();
+        }
+
+        function toggleWidget(e) {
+            if (e) e.stopPropagation();
+            const widget = document.getElementById('music-widget');
+            if (widget.classList.contains('collapsed')) {
+                widget.classList.remove('collapsed');
+                widget.classList.add('expanded');
+            } else {
+                widget.classList.remove('expanded');
+                widget.classList.add('collapsed');
+            }
+        }
+        document.getElementById('music-widget').addEventListener('click', function(e) { e.stopPropagation(); });
+
+        const htmlEl = document.documentElement;
+        const themeToggleIcon = document.getElementById('theme-toggle');
+        function applyTheme(isDark) {
+            if (isDark) { htmlEl.classList.add('dark'); themeToggleIcon.classList.replace('fa-moon', 'fa-sun'); localStorage.setItem('blog-theme', 'dark'); }
+            else { htmlEl.classList.remove('dark'); themeToggleIcon.classList.replace('fa-sun', 'fa-moon'); localStorage.setItem('blog-theme', 'light'); }
+        }
+        (function initTheme() {
+            const saved = localStorage.getItem('blog-theme');
+            if (saved === 'dark') applyTheme(true);
+            else if (saved === 'light') applyTheme(false);
+            else applyTheme(window.matchMedia('(prefers-color-scheme: dark)').matches);
+        })();
+        themeToggleIcon.addEventListener('click', () => applyTheme(!htmlEl.classList.contains('dark')));
+        document.getElementById('settings-theme-toggle').addEventListener('click', () => applyTheme(!htmlEl.classList.contains('dark')));
+
+        const settingsBtn = document.getElementById('settings-btn');
+        const settingsPanel = document.getElementById('settings-panel');
+        settingsBtn.addEventListener('click', () => settingsPanel.classList.toggle('hidden-panel'));
+        document.getElementById('close-settings').addEventListener('click', () => settingsPanel.classList.add('hidden-panel'));
+        document.addEventListener('click', (e) => { if (!settingsPanel.contains(e.target) && !settingsBtn.contains(e.target)) settingsPanel.classList.add('hidden-panel'); });
+
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchHitokoto();
+            renderShuoshuo();
+            renderAlbum();
+        });
+    </script>
+</body>
+</html>        </div>
+
         <!-- 说说视图 -->
         <div id="shuoshuo-view" class="hidden">
             <div class="flex items-center gap-4 mb-6">
