@@ -13,13 +13,27 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function switchTab(viewName) {
-    // 修正：将 articleDetail 改为 article-detail，与 HTML 中的 ID 保持一致
-    ['home', 'articles', 'article-detail', 'shuoshuo', 'album', 'admin'].forEach(v => {
+    // 强制容错：如果传入的是 articleDetail，自动纠正为 article-detail
+    if (viewName === 'articleDetail') viewName = 'article-detail';
+
+    const views = ['home', 'articles', 'article-detail', 'shuoshuo', 'album', 'admin'];
+    
+    // 隐藏所有视图
+    views.forEach(v => {
         const el = document.getElementById(v + '-view');
         if (el) { el.classList.add('hidden'); el.classList.remove('block'); }
     });
-    const target = document.getElementById(viewName + '-view');
-    if (target) { target.classList.remove('hidden'); target.classList.add('block'); }
+
+    // 显示目标视图
+    const targetId = viewName + '-view';
+    const target = document.getElementById(targetId);
+    if (target) {
+        target.classList.remove('hidden');
+        target.classList.add('block');
+    } else {
+        console.error('找不到页面元素:', targetId, '请检查 index.html 中是否存在此 ID');
+    }
+    
     window.scrollTo({top: 0, behavior: 'smooth'});
 
     if (viewName === 'articles') renderArticles();
@@ -28,7 +42,9 @@ function switchTab(viewName) {
     if (viewName === 'admin' && typeof renderAdminLists === 'function') renderAdminLists(); 
 }
 
-// 主题控制
+// ============================================================
+// 2. 核心前台逻辑（主题、一言、设置）
+// ============================================================
 const htmlEl = document.documentElement; 
 const themeToggleIcon = document.getElementById('theme-toggle');
 function applyTheme(isDark) { 
@@ -43,9 +59,6 @@ settingsBtn.addEventListener('click', () => settingsPanel.classList.toggle('hidd
 document.getElementById('close-settings').addEventListener('click', () => settingsPanel.classList.add('hidden-panel'));
 document.addEventListener('click', (e) => { if (!settingsPanel.contains(e.target) && !settingsBtn.contains(e.target)) settingsPanel.classList.add('hidden-panel'); });
 
-// ============================================================
-// 2. 一言与设置加载
-// ============================================================
 function fetchHitokoto() { 
     const textElement = document.getElementById('hitokoto-text'); 
     if (!textElement) return; 
@@ -94,7 +107,7 @@ async function recordVisit() {
 }
 
 // ============================================================
-// 3. 前台渲染逻辑
+// 3. 文章渲染逻辑
 // ============================================================
 async function renderArticles() {
     const container = document.getElementById('articles-list');
@@ -127,8 +140,10 @@ async function renderArticles() {
 }
 
 async function openArticle(id) {
-    // 修正：将 articleDetail 改为 article-detail
+    // 确保切换到正确的视图 ID
     switchTab('article-detail');
+    
+    // 设置加载状态
     document.getElementById('detail-title').innerText = '加载中...';
     document.getElementById('detail-content').innerHTML = '<div class="skeleton h-64 w-full"></div>';
     document.getElementById('detail-time').innerText = '';
@@ -137,11 +152,11 @@ async function openArticle(id) {
 
     const res = await api.articles.getOne(id);
     if (!res.success) {
-        document.getElementById('detail-content').innerHTML = `<div class="text-red-400 text-center py-10">加载失败：${res.error}</div>`;
+        document.getElementById('detail-content').innerHTML = `<div class="text-red-400 text-center py-10">加载失败：${res.error || '未知错误'}</div>`;
         return;
     }
     
-    const data = res.data;
+    const data = res.data || {};
     document.getElementById('detail-title').innerText = data.title || '无标题';
     document.getElementById('detail-time').innerText = data.time || '未知时间';
     document.getElementById('detail-views').innerText = data.views || 0;
@@ -154,6 +169,7 @@ async function openArticle(id) {
     }
     document.getElementById('detail-tags').innerHTML = tagsHtml;
 
+    // Markdown 渲染（带容错）
     try {
         if (typeof marked !== 'undefined' && marked.parse) {
             document.getElementById('detail-content').innerHTML = marked.parse(data.content || '');
@@ -161,13 +177,18 @@ async function openArticle(id) {
                 document.querySelectorAll('#detail-content pre code').forEach((block) => { hljs.highlightElement(block); });
             }
         } else {
+            // 如果 marked 没加载出来，直接显示纯文本，防止页面空白
             document.getElementById('detail-content').innerText = data.content || '（无内容）';
         }
     } catch (e) {
-        document.getElementById('detail-content').innerHTML = `<div class="text-red-500 mb-4">⚠️ 渲染出错：${e.message}</div><pre class="whitespace-pre-wrap">${data.content}</div>`;
+        // 即使渲染失败，也保底显示原始内容
+        document.getElementById('detail-content').innerHTML = `<div class="text-red-500 mb-4">⚠️ 渲染出错：${e.message}</div><pre class="whitespace-pre-wrap">${data.content || ''}</pre>`;
     }
 }
 
+// ============================================================
+// 4. 说说渲染逻辑
+// ============================================================
 async function renderShuoshuo() {
     const container = document.getElementById('shuoshuo-list');
     container.innerHTML = Array(3).fill(`<div class="glass rounded-2xl p-6"><div class="flex items-center space-x-3 mb-3"><div class="skeleton w-10 h-10 rounded-full"></div><div class="space-y-2"><div class="skeleton h-3 w-16"></div><div class="skeleton h-2 w-12"></div></div></div><div class="skeleton h-4 w-full mb-2"></div><div class="skeleton h-4 w-2/3"></div></div>`).join('');
@@ -286,6 +307,9 @@ async function submitComment(shuoshuoId) {
     }
 }
 
+// ============================================================
+// 5. 相册渲染逻辑
+// ============================================================
 async function renderAlbum() {
     const container = document.getElementById('album-list');
     container.innerHTML = Array(6).fill('<div class="glass rounded-2xl overflow-hidden skeleton h-48 w-full break-inside-avoid"></div>').join('');
@@ -303,7 +327,7 @@ async function renderAlbum() {
 }
 
 // ============================================================
-// 4. 悬浮球拖拽
+// 6. 悬浮球拖拽与吸附
 // ============================================================
 const widget = document.getElementById('music-widget'); 
 let isDragging = false; 
