@@ -111,8 +111,7 @@
         </div>
 
         <!-- 文章详情视图 -->
-    
-<script src="js/main.js?v=2"></script>
+        <div id="article-detail-view" class="hidden">
             <div class="flex items-center gap-4 mb-6">
                 <button onclick="switchTab('articles')" class="glass px-4 py-2 rounded-full flex items-center gap-2 hover:bg-white dark:hover:bg-gray-700 transition text-sm text-gray-600 dark:text-gray-300"><i class="fas fa-arrow-left"></i> 返回文章列表</button>
             </div>
@@ -250,9 +249,9 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
 
-    <!-- 引入我们拆分好的脚本 -->
-    <script src="js/api.js"></script>
-    <script src="js/main.js"></script>
-    <script src="js/admin.js"></script>
+    <!-- 引入拆分好的脚本（加上版本号防止缓存） -->
+    <script src="js/api.js?v=3"></script>
+    <script src="js/main.js?v=3"></script>
+    <script src="js/admin.js?v=3"></script>
 </body>
 </html>
