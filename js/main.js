@@ -13,7 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function switchTab(viewName) {
-    ['home', 'articles', 'articleDetail', 'shuoshuo', 'album', 'admin'].forEach(v => {
+    // 修正：将 articleDetail 改为 article-detail，与 HTML 中的 ID 保持一致
+    ['home', 'articles', 'article-detail', 'shuoshuo', 'album', 'admin'].forEach(v => {
         const el = document.getElementById(v + '-view');
         if (el) { el.classList.add('hidden'); el.classList.remove('block'); }
     });
@@ -126,7 +127,8 @@ async function renderArticles() {
 }
 
 async function openArticle(id) {
-    switchTab('articleDetail');
+    // 修正：将 articleDetail 改为 article-detail
+    switchTab('article-detail');
     document.getElementById('detail-title').innerText = '加载中...';
     document.getElementById('detail-content').innerHTML = '<div class="skeleton h-64 w-full"></div>';
     document.getElementById('detail-time').innerText = '';
