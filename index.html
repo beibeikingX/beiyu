@@ -243,16 +243,14 @@
     </div>
 
     <script>
-        // ============================================================
-        // ★★★ 重要：请在这里填入你的 ImgBB API Key ★★★
-        // 去 https://api.imgbb.com/ 免费注册获取，30秒搞定
-        // ============================================================
-        const IMGBB_API_KEY = '你的ImgBB API Key'; 
-
         const API_TOKEN = 'my-secret-token-123'; 
         const authHeaders = { 'Authorization': `Bearer ${API_TOKEN}` };
 
-        // 图片压缩函数
+        // ============================================================
+        // 0. 图片压缩与 R2 上传功能
+        // ============================================================
+        
+        // 压缩图片函数
         function compressImage(file, maxWidth = 1200, quality = 0.8) {
             return new Promise((resolve) => {
                 const reader = new FileReader();
@@ -280,7 +278,6 @@
             });
         }
 
-        // 图片上传函数（彻底绕过 Cloudflare Worker，直接请求 ImgBB）
         async function uploadImage(inputElement, targetInputId) {
             const file = inputElement.files[0];
             if (!file) return;
@@ -295,27 +292,23 @@
                 const compressedBlob = await compressImage(file);
                 targetInput.placeholder = '图片上传中...';
 
-                // 2. 构建 FormData
+                // 2. 构建 FormData，发送 Blob 给后端（Cloudflare Worker 会存入 R2）
                 const formData = new FormData();
-                formData.append('image', compressedBlob);
+                formData.append('file', compressedBlob, 'image.jpg');
 
-                // 3. 浏览器直接请求 ImgBB API
-                const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+                // 3. 请求自己的后端 API
+                const res = await fetch('/api/upload', {
                     method: 'POST',
+                    headers: authHeaders,
                     body: formData
                 });
-
-                if (!res.ok) {
-                    throw new Error(`ImgBB 响应错误: ${res.status}`);
-                }
-
                 const data = await res.json();
                 
-                if (data && data.data && data.data.url) {
-                    targetInput.value = data.data.url;
+                if (data.success && data.url) {
+                    targetInput.value = data.url;
                     alert('图片上传成功！');
                 } else {
-                    throw new Error(data.error ? data.error.message : '图床返回数据异常');
+                    throw new Error(data.error || '上传失败');
                 }
             } catch (e) {
                 alert('上传失败：' + e.message);
@@ -327,7 +320,7 @@
         }
 
         // ============================================================
-        // 悬浮球拖拽与吸附逻辑
+        // 1. 悬浮球拖拽与吸附逻辑
         // ============================================================
         const widget = document.getElementById('music-widget'); let isDragging = false; let isMoved = false; let startX, startY, startLeft, startTop;
         function getClientX(e) { return e.type.includes('mouse') ? e.clientX : e.touches[0].clientX; }
@@ -356,7 +349,7 @@
         function toggleWidget(e) { if (e) e.stopPropagation(); if (isMoved) return; const widget = document.getElementById('music-widget'); if (widget.classList.contains('collapsed')) { widget.classList.remove('collapsed'); widget.classList.add('expanded'); } else { widget.classList.remove('expanded'); widget.classList.add('collapsed'); } }
 
         // ============================================================
-        // 数据渲染逻辑
+        // 2. 数据渲染逻辑
         // ============================================================
         async function renderShuoshuo() {
             const container = document.getElementById('shuoshuo-list');
@@ -458,7 +451,7 @@
         }
 
         // ============================================================
-        // 后台渲染、编辑与提交逻辑
+        // 3. 后台渲染、编辑与提交逻辑
         // ============================================================
         async function renderAdminLists() {
             const adminShuoshuoContainer = document.getElementById('admin-shuoshuo-list');
@@ -515,7 +508,7 @@
         async function deleteAlbum(id) { if(!confirm('确定删除这张照片吗？')) return; const res = await fetch(`/api/album?id=${id}`, { method: 'DELETE', headers: authHeaders }); if(res.status === 403) return alert('无权操作'); alert('删除成功！'); renderAdminLists(); renderAlbum(); }
 
         // ============================================================
-        // 后台登录、设置与统计
+        // 4. 后台登录、设置与统计
         // ============================================================
         function handleLogin() { const user = document.getElementById('admin-username').value; const pass = document.getElementById('admin-password').value; if (user === 'admin' && pass === '1677554758a') { document.getElementById('admin-login').classList.add('hidden'); document.getElementById('admin-main').classList.remove('hidden'); renderAdminLists(); alert('登录成功！'); } else { alert('账号或密码错误！'); } }
         function logout() { document.getElementById('admin-login').classList.remove('hidden'); document.getElementById('admin-main').classList.add('hidden'); document.getElementById('admin-username').value = ''; document.getElementById('admin-password').value = ''; cancelEditShuoshuo(); cancelEditAlbum(); switchTab('home'); }
