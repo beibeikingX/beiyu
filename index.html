@@ -200,7 +200,6 @@
                         <input type="hidden" id="edit-shuoshuo-id" value="">
                         <textarea id="new-shuoshuo-text" rows="3" placeholder="今天心情怎么样..." class="w-full glass border border-gray-300 dark:border-gray-600 rounded-xl p-3 outline-none focus:border-blue-500 transition bg-transparent mb-3 resize-none"></textarea>
                         <input type="text" id="new-shuoshuo-tags" placeholder="标签 (如：日常,代码，用逗号分隔)" class="w-full glass border border-gray-300 dark:border-gray-600 rounded-xl px-3 py-2 outline-none focus:border-blue-500 transition bg-transparent mb-3 text-sm">
-                        <!-- 说说配图上传模块 -->
                         <div class="flex gap-2 mb-4">
                             <input type="url" id="new-shuoshuo-img" placeholder="配图链接 (可选，也可以点击右侧上传)" class="flex-1 glass border border-gray-300 dark:border-gray-600 rounded-xl px-3 py-2 outline-none focus:border-blue-500 transition bg-transparent text-sm">
                             <label class="glass border border-gray-300 dark:border-gray-600 rounded-xl px-3 py-2 cursor-pointer hover:bg-white dark:hover:bg-gray-700 transition flex items-center justify-center shrink-0">
@@ -213,7 +212,6 @@
                     <div class="glass rounded-3xl p-6">
                         <h4 class="font-bold mb-4 flex items-center justify-between"><span><i class="fas fa-image text-purple-500 mr-2"></i><span id="album-form-title">添加相册图片</span></span><button id="cancel-album-btn" onclick="cancelEditAlbum()" class="hidden text-xs bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded-full">取消编辑</button></h4>
                         <input type="hidden" id="edit-album-id" value="">
-                        <!-- 相册图片上传模块 -->
                         <div class="flex gap-2 mb-3">
                             <input type="url" id="new-album-img" placeholder="图片链接 (必填，也可以点击右侧上传)" class="flex-1 glass border border-gray-300 dark:border-gray-600 rounded-xl px-3 py-2 outline-none focus:border-purple-500 transition bg-transparent">
                             <label class="glass border border-gray-300 dark:border-gray-600 rounded-xl px-3 py-2 cursor-pointer hover:bg-white dark:hover:bg-gray-700 transition flex items-center justify-center shrink-0">
@@ -245,26 +243,60 @@
     </div>
 
     <script>
-        // ⚠️ 管理员 API 密钥（需与 Cloudflare 环境变量 ADMIN_TOKEN 保持一致）
         const API_TOKEN = 'my-secret-token-123'; 
         const authHeaders = { 'Authorization': `Bearer ${API_TOKEN}` };
 
         // ============================================================
-        // 0. 图片上传功能
+        // 0. 图片压缩与上传功能（新增了压缩）
         // ============================================================
+        
+        // 压缩图片函数
+        function compressImage(file, maxWidth = 1200, quality = 0.8) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        if (width > maxWidth) {
+                            height = Math.round((height * maxWidth) / width);
+                            width = maxWidth;
+                        }
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        canvas.toBlob((blob) => {
+                            resolve(blob);
+                        }, 'image/jpeg', quality);
+                    };
+                };
+            });
+        }
+
         async function uploadImage(inputElement, targetInputId) {
             const file = inputElement.files[0];
             if (!file) return;
 
             const targetInput = document.getElementById(targetInputId);
             const originalPlaceholder = targetInput.placeholder;
-            targetInput.placeholder = '图片上传中，请稍候...';
+            targetInput.placeholder = '图片压缩中...';
             targetInput.disabled = true;
 
-            const formData = new FormData();
-            formData.append('file', file);
-
             try {
+                // 1. 先压缩图片
+                const compressedBlob = await compressImage(file);
+                
+                targetInput.placeholder = '图片上传中，请稍候...';
+                
+                // 2. 上传压缩后的图片
+                const formData = new FormData();
+                formData.append('file', compressedBlob, 'image.jpg');
+
                 const res = await fetch('/api/upload', {
                     method: 'POST',
                     headers: authHeaders,
@@ -283,7 +315,7 @@
             } finally {
                 targetInput.placeholder = originalPlaceholder;
                 targetInput.disabled = false;
-                inputElement.value = ''; // 清空 file input，方便下次选择同一张图
+                inputElement.value = '';
             }
         }
 
@@ -314,7 +346,6 @@
         }
         widget.addEventListener('mousedown', dragStart); document.addEventListener('mousemove', dragMove); document.addEventListener('mouseup', dragEnd);
         widget.addEventListener('touchstart', dragStart, { passive: false }); document.addEventListener('touchmove', dragMove, { passive: false }); document.addEventListener('touchend', dragEnd);
-
         function toggleWidget(e) { if (e) e.stopPropagation(); if (isMoved) return; const widget = document.getElementById('music-widget'); if (widget.classList.contains('collapsed')) { widget.classList.remove('collapsed'); widget.classList.add('expanded'); } else { widget.classList.remove('expanded'); widget.classList.add('collapsed'); } }
 
         // ============================================================
