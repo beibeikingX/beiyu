@@ -43,43 +43,26 @@
         .hover-lift { transition: transform 0.3s ease, box-shadow 0.3s ease; }
         .hover-lift:hover { transform: translateY(-3px); box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.2); }
 
-        /* 悬浮窗核心样式 */
-        #music-widget { 
-            transition: transform 0.3s ease, opacity 0.3s ease, background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
-            transform-origin: bottom right; 
-            overflow: hidden; 
-            cursor: grab;
-            user-select: none;
-            z-index: 999;
-        }
-        #music-widget:active { cursor: grabbing; }
-        #music-widget.collapsed { 
-            width: 56px; height: 56px; border-radius: 50%; padding: 0; 
-            display: flex; align-items: center; justify-content: center; 
-            opacity: 0.9; 
-        }
-        #music-widget.collapsed:hover { opacity: 1; }
-        #music-widget.collapsed .widget-header { display: none !important; }
-        #music-widget.collapsed .widget-content { display: none !important; }
-        #music-widget.collapsed .aplayer { display: none !important; }
-        #music-widget.collapsed .collapsed-icon { display: block; }
+        /* 骨架屏动画 */
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+        .skeleton { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; background-color: rgba(200, 200, 200, 0.5); border-radius: 8px; }
 
+        /* 悬浮窗 */
+        #music-widget { transition: transform 0.3s ease, opacity 0.3s ease, background 0.4s ease; transform-origin: bottom right; overflow: hidden; cursor: grab; user-select: none; z-index: 999; }
+        #music-widget:active { cursor: grabbing; }
+        #music-widget.collapsed { width: 56px; height: 56px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center; opacity: 0.9; }
+        #music-widget.collapsed:hover { opacity: 1; }
+        #music-widget.collapsed .widget-header, #music-widget.collapsed .widget-content, #music-widget.collapsed .aplayer { display: none !important; }
+        #music-widget.collapsed .collapsed-icon { display: block; }
         #music-widget.expanded { width: 85vw; max-width: 350px; height: auto; border-radius: 1.5rem; padding: 0.5rem; }
-        #music-widget.expanded .widget-header { display: flex; }
-        #music-widget.expanded .widget-content { display: block; }
+        #music-widget.expanded .widget-header, #music-widget.expanded .widget-content { display: block; }
         #music-widget.expanded .collapsed-icon { display: none; }
 
-        /* APlayer 美化 */
         .aplayer { background: transparent !important; color: #333 !important; font-family: inherit !important; margin: 0 !important; width: 100% !important; }
         html.dark .aplayer { color: #e2e8f0 !important; }
         .aplayer .aplayer-info { border-bottom: none !important; padding: 10px 15px 0 15px !important; }
-        .aplayer .aplayer-info .aplayer-music .aplayer-title { font-size: 15px !important; font-weight: bold !important; }
         .aplayer .aplayer-list { max-height: 200px !important; overflow-y: auto !important; margin-top: 5px !important; border-top: 1px solid rgba(150,150,150,0.2) !important; }
         .aplayer .aplayer-list ol li { border-top: none !important; border-bottom: 1px solid rgba(150,150,150,0.1) !important; font-size: 12px !important; padding: 8px 15px !important; }
-        .aplayer .aplayer-list ol li.aplayer-list-light { background: rgba(59, 130, 246, 0.15) !important; }
-        html.dark .aplayer .aplayer-list ol li.aplayer-list-light { background: rgba(59, 130, 246, 0.3) !important; }
-        .aplayer .aplayer-list ol li:hover { background: rgba(255,255,255,0.5) !important; }
-        html.dark .aplayer .aplayer-list ol li:hover { background: rgba(255,255,255,0.1) !important; }
 
         #settings-panel { transition: opacity 0.3s ease, transform 0.3s ease; }
         #settings-panel.hidden-panel { opacity: 0; transform: translateY(-10px); pointer-events: none; }
@@ -91,6 +74,7 @@
     <nav class="glass rounded-2xl max-w-6xl mx-auto px-6 py-4 flex flex-wrap justify-between items-center mb-8 sticky top-4 z-50">
         <div class="flex items-center space-x-3">
             <span id="site-name-display" class="text-xl font-bold tracking-wider">北宇的小站</span>
+            <span id="visit-count" class="text-xs bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 px-2 py-0.5 rounded-full hidden">访问量: 0</span>
         </div>
         <div class="hidden md:flex space-x-6 text-sm font-medium">
             <a href="#" onclick="switchTab('home')" class="text-blue-500 hover:text-blue-700 transition">首页</a>
@@ -124,17 +108,15 @@
 
     <!-- 主内容区 -->
     <main class="max-w-6xl mx-auto">
-
         <!-- 首页视图 -->
         <div id="home-view" class="block">
             <div class="glass rounded-3xl p-6 flex flex-col items-center justify-center gap-4 mb-6 hover-lift">
-                <img src="https://q1.qlogo.cn/g?b=qq&nk=1779180196&s=100" referrerpolicy="no-referrer" alt="QQ Avatar" class="w-24 h-24 rounded-full border-4 border-white/50 shadow-sm bg-white dark:bg-gray-800">
+                <img src="https://q1.qlogo.cn/g?b=qq&nk=1779180196&s=100" referrerpolicy="no-referrer" alt="QQ Avatar" class="w-24 h-24 rounded-full border-4 border-white/50 shadow-sm bg-white dark:bg-gray-800" loading="lazy">
                 <div class="text-center">
                     <h2 class="text-2xl font-bold">北宇</h2>
                     <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">在代码与学术间穿梭的普通人</p>
                 </div>
             </div>
-
             <div onclick="fetchHitokoto()" title="点击刷新文案" class="glass-dark text-white rounded-3xl p-6 mb-8 flex items-start justify-between text-sm hover-lift cursor-pointer group">
                 <div class="flex items-start flex-1 min-w-0">
                     <i class="fas fa-quote-left mr-3 mt-0.5 text-yellow-400 text-lg shrink-0"></i>
@@ -142,7 +124,6 @@
                 </div>
                 <i class="fas fa-sync-alt ml-3 mt-0.5 text-gray-400 group-hover:text-white group-hover:rotate-180 transition-all duration-500 shrink-0"></i>
             </div>
-
             <h3 class="text-xl font-bold mb-4 pl-2 border-l-4 border-blue-500">快捷入口</h3>
             <div class="grid grid-cols-2 gap-6">
                 <div onclick="switchTab('shuoshuo')" class="glass rounded-3xl p-8 flex flex-col items-center justify-center hover-lift cursor-pointer group">
@@ -165,9 +146,7 @@
         <!-- 说说视图 -->
         <div id="shuoshuo-view" class="hidden">
             <div class="flex items-center gap-4 mb-6">
-                <button onclick="switchTab('home')" class="glass px-4 py-2 rounded-full flex items-center gap-2 hover:bg-white dark:hover:bg-gray-700 transition text-sm text-gray-600 dark:text-gray-300">
-                    <i class="fas fa-arrow-left"></i> 返回首页
-                </button>
+                <button onclick="switchTab('home')" class="glass px-4 py-2 rounded-full flex items-center gap-2 hover:bg-white dark:hover:bg-gray-700 transition text-sm text-gray-600 dark:text-gray-300"><i class="fas fa-arrow-left"></i> 返回首页</button>
                 <h3 class="text-xl font-bold pl-2 border-l-4 border-blue-500">说说</h3>
             </div>
             <div id="shuoshuo-list" class="space-y-4"></div>
@@ -176,9 +155,7 @@
         <!-- 相册视图 -->
         <div id="album-view" class="hidden">
             <div class="flex items-center gap-4 mb-6">
-                <button onclick="switchTab('home')" class="glass px-4 py-2 rounded-full flex items-center gap-2 hover:bg-white dark:hover:bg-gray-700 transition text-sm text-gray-600 dark:text-gray-300">
-                    <i class="fas fa-arrow-left"></i> 返回首页
-                </button>
+                <button onclick="switchTab('home')" class="glass px-4 py-2 rounded-full flex items-center gap-2 hover:bg-white dark:hover:bg-gray-700 transition text-sm text-gray-600 dark:text-gray-300"><i class="fas fa-arrow-left"></i> 返回首页</button>
                 <h3 class="text-xl font-bold pl-2 border-l-4 border-blue-500">相册</h3>
             </div>
             <div id="album-list" class="columns-1 sm:columns-2 md:columns-3 gap-4 space-y-4"></div>
@@ -187,19 +164,12 @@
         <!-- 后台管理视图 -->
         <div id="admin-view" class="hidden">
             <div class="flex items-center gap-4 mb-6">
-                <button onclick="switchTab('home')" class="glass px-4 py-2 rounded-full flex items-center gap-2 hover:bg-white dark:hover:bg-gray-700 transition text-sm text-gray-600 dark:text-gray-300">
-                    <i class="fas fa-arrow-left"></i> 返回首页
-                </button>
+                <button onclick="switchTab('home')" class="glass px-4 py-2 rounded-full flex items-center gap-2 hover:bg-white dark:hover:bg-gray-700 transition text-sm text-gray-600 dark:text-gray-300"><i class="fas fa-arrow-left"></i> 返回首页</button>
                 <h3 class="text-xl font-bold pl-2 border-l-4 border-red-500">后台管理</h3>
             </div>
-
-            <!-- 登录模块 -->
             <div id="admin-login" class="glass rounded-3xl p-8 max-w-md mx-auto">
                 <div class="text-center mb-6">
-                    <svg class="w-32 h-32 mx-auto mb-4 text-gray-400 dark:text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 4.5a4 4 0 1 0 0 8 4 4 0 1 0 0-8Z" />
-                        <path d="M4.5 20a7.5 7.5 0 0 1 15 0" />
-                    </svg>
+                    <svg class="w-32 h-32 mx-auto mb-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5a4 4 0 1 0 0 8 4 4 0 1 0 0-8Z" /><path d="M4.5 20a7.5 7.5 0 0 1 15 0" /></svg>
                     <h4 class="text-lg font-bold">请输入管理员账号密码</h4>
                 </div>
                 <div class="space-y-4">
@@ -208,202 +178,157 @@
                     <button onclick="handleLogin()" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-blue-500/30">登录后台</button>
                 </div>
             </div>
-
-            <!-- 管理主界面 -->
             <div id="admin-main" class="hidden">
-                <!-- 全局设置区 -->
                 <h4 class="font-bold mb-4 pl-2 border-l-4 border-green-500 flex items-center"><i class="fas fa-cog mr-2"></i>全局设置</h4>
                 <div class="glass rounded-3xl p-6 mb-8 space-y-6">
                     <div>
                         <label class="block text-sm font-bold mb-2 text-gray-700 dark:text-gray-300">站点名称</label>
-                        <div class="flex flex-col sm:flex-row gap-3">
-                            <input type="text" id="setting-site-name" placeholder="如：北宇的小站" class="flex-1 glass border border-gray-300 dark:border-gray-600 rounded-xl px-3 py-2 outline-none focus:border-green-500 transition bg-transparent text-sm">
-                            <button onclick="saveSiteName()" class="bg-green-500 hover:bg-green-600 text-white font-bold px-6 py-2 rounded-xl transition text-sm shadow-md">保存名称</button>
-                        </div>
+                        <div class="flex flex-col sm:flex-row gap-3"><input type="text" id="setting-site-name" placeholder="如：北宇的小站" class="flex-1 glass border border-gray-300 dark:border-gray-600 rounded-xl px-3 py-2 outline-none focus:border-green-500 transition bg-transparent text-sm"><button onclick="saveSiteName()" class="bg-green-500 hover:bg-green-600 text-white font-bold px-6 py-2 rounded-xl transition text-sm shadow-md">保存名称</button></div>
                     </div>
                     <div>
                         <label class="block text-sm font-bold mb-2 text-gray-700 dark:text-gray-300">卡片透明度 (0-100)</label>
-                        <div class="flex flex-col sm:flex-row gap-3 items-center">
-                            <input type="range" id="setting-opacity" min="0" max="100" value="75" class="flex-1 accent-green-500">
-                            <span id="opacity-value" class="text-sm font-mono bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">75%</span>
-                            <button onclick="saveOpacity()" class="bg-green-500 hover:bg-green-600 text-white font-bold px-6 py-2 rounded-xl transition text-sm shadow-md">保存透明度</button>
-                        </div>
+                        <div class="flex flex-col sm:flex-row gap-3 items-center"><input type="range" id="setting-opacity" min="0" max="100" value="75" class="flex-1 accent-green-500"><span id="opacity-value" class="text-sm font-mono bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">75%</span><button onclick="saveOpacity()" class="bg-green-500 hover:bg-green-600 text-white font-bold px-6 py-2 rounded-xl transition text-sm shadow-md">保存透明度</button></div>
                     </div>
                     <div>
                         <label class="block text-sm font-bold mb-2 text-gray-700 dark:text-gray-300">自定义背景图</label>
-                        <div class="flex flex-col sm:flex-row gap-3">
-                            <input type="url" id="setting-bg-url" placeholder="输入图片链接，留空则恢复默认" class="flex-1 glass border border-gray-300 dark:border-gray-600 rounded-xl px-3 py-2 outline-none focus:border-green-500 transition bg-transparent text-sm">
-                            <button onclick="saveBgSetting()" class="bg-green-500 hover:bg-green-600 text-white font-bold px-6 py-2 rounded-xl transition text-sm shadow-md">保存背景</button>
-                            <button onclick="deleteBgSetting()" class="bg-red-500 hover:bg-red-600 text-white font-bold px-6 py-2 rounded-xl transition text-sm shadow-md">恢复默认</button>
-                        </div>
+                        <div class="flex flex-col sm:flex-row gap-3"><input type="url" id="setting-bg-url" placeholder="输入图片链接" class="flex-1 glass border border-gray-300 dark:border-gray-600 rounded-xl px-3 py-2 outline-none focus:border-green-500 transition bg-transparent text-sm"><button onclick="saveBgSetting()" class="bg-green-500 hover:bg-green-600 text-white font-bold px-6 py-2 rounded-xl transition text-sm shadow-md">保存背景</button><button onclick="deleteBgSetting()" class="bg-red-500 hover:bg-red-600 text-white font-bold px-6 py-2 rounded-xl transition text-sm shadow-md">恢复默认</button></div>
                     </div>
                 </div>
-
-                <!-- 发布与修改区 -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div class="glass rounded-3xl p-6">
-                        <h4 class="font-bold mb-4 flex items-center justify-between">
-                            <span><i class="fas fa-plus-circle text-blue-500 mr-2"></i><span id="shuoshuo-form-title">发布说说</span></span>
-                            <button id="cancel-shuoshuo-btn" onclick="cancelEditShuoshuo()" class="hidden text-xs bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition">取消编辑</button>
-                        </h4>
+                        <h4 class="font-bold mb-4 flex items-center justify-between"><span><i class="fas fa-plus-circle text-blue-500 mr-2"></i><span id="shuoshuo-form-title">发布说说</span></span><button id="cancel-shuoshuo-btn" onclick="cancelEditShuoshuo()" class="hidden text-xs bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded-full">取消编辑</button></h4>
                         <input type="hidden" id="edit-shuoshuo-id" value="">
                         <textarea id="new-shuoshuo-text" rows="3" placeholder="今天心情怎么样..." class="w-full glass border border-gray-300 dark:border-gray-600 rounded-xl p-3 outline-none focus:border-blue-500 transition bg-transparent mb-3 resize-none"></textarea>
-                        <input type="url" id="new-shuoshuo-img" placeholder="配图链接 (可选，如 https://...)" class="w-full glass border border-gray-300 dark:border-gray-600 rounded-xl px-3 py-2 outline-none focus:border-blue-500 transition bg-transparent mb-4 text-sm">
+                        <input type="text" id="new-shuoshuo-tags" placeholder="标签 (如：日常,代码，用逗号分隔)" class="w-full glass border border-gray-300 dark:border-gray-600 rounded-xl px-3 py-2 outline-none focus:border-blue-500 transition bg-transparent mb-3 text-sm">
+                        <input type="url" id="new-shuoshuo-img" placeholder="配图链接 (可选)" class="w-full glass border border-gray-300 dark:border-gray-600 rounded-xl px-3 py-2 outline-none focus:border-blue-500 transition bg-transparent mb-4 text-sm">
                         <button id="shuoshuo-submit-btn" onclick="submitShuoshuo()" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 rounded-xl transition">立即发布</button>
                     </div>
-
                     <div class="glass rounded-3xl p-6">
-                        <h4 class="font-bold mb-4 flex items-center justify-between">
-                            <span><i class="fas fa-image text-purple-500 mr-2"></i><span id="album-form-title">添加相册图片</span></span>
-                            <button id="cancel-album-btn" onclick="cancelEditAlbum()" class="hidden text-xs bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition">取消编辑</button>
-                        </h4>
+                        <h4 class="font-bold mb-4 flex items-center justify-between"><span><i class="fas fa-image text-purple-500 mr-2"></i><span id="album-form-title">添加相册图片</span></span><button id="cancel-album-btn" onclick="cancelEditAlbum()" class="hidden text-xs bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded-full">取消编辑</button></h4>
                         <input type="hidden" id="edit-album-id" value="">
-                        <input type="url" id="new-album-img" placeholder="图片链接 (必填，如 https://...)" class="w-full glass border border-gray-300 dark:border-gray-600 rounded-xl px-3 py-2 outline-none focus:border-purple-500 transition bg-transparent mb-3">
-                        <input type="text" id="new-album-desc" placeholder="图片描述 (如：风景与自然)" class="w-full glass border border-gray-300 dark:border-gray-600 rounded-xl px-3 py-2 outline-none focus:border-purple-500 transition bg-transparent mb-4">
+                        <input type="url" id="new-album-img" placeholder="图片链接 (必填)" class="w-full glass border border-gray-300 dark:border-gray-600 rounded-xl px-3 py-2 outline-none focus:border-purple-500 transition bg-transparent mb-3">
+                        <input type="text" id="new-album-desc" placeholder="图片描述" class="w-full glass border border-gray-300 dark:border-gray-600 rounded-xl px-3 py-2 outline-none focus:border-purple-500 transition bg-transparent mb-4">
                         <button id="album-submit-btn" onclick="submitAlbum()" class="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 rounded-xl transition">添加图片</button>
                     </div>
                 </div>
-
                 <h4 class="font-bold mt-10 mb-4 pl-2 border-l-4 border-red-500 flex items-center"><i class="fas fa-tasks mr-2"></i>内容管理</h4>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div class="glass rounded-3xl p-6">
-                        <h4 class="font-bold mb-4 flex items-center justify-between">
-                            <span><i class="fas fa-comment text-blue-500 mr-2"></i>管理说说</span>
-                            <span class="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded-full text-gray-500">可编辑/删除</span>
-                        </h4>
-                        <div id="admin-shuoshuo-list" class="space-y-3 max-h-[400px] overflow-y-auto pr-2"></div>
-                    </div>
-                    <div class="glass rounded-3xl p-6">
-                        <h4 class="font-bold mb-4 flex items-center justify-between">
-                            <span><i class="fas fa-image text-purple-500 mr-2"></i>管理相册</span>
-                            <span class="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded-full text-gray-500">可编辑/删除</span>
-                        </h4>
-                        <div id="admin-album-list" class="space-y-3 max-h-[400px] overflow-y-auto pr-2"></div>
-                    </div>
+                    <div class="glass rounded-3xl p-6"><h4 class="font-bold mb-4 flex items-center justify-between"><span><i class="fas fa-comment text-blue-500 mr-2"></i>管理说说</span></h4><div id="admin-shuoshuo-list" class="space-y-3 max-h-[400px] overflow-y-auto pr-2"></div></div>
+                    <div class="glass rounded-3xl p-6"><h4 class="font-bold mb-4 flex items-center justify-between"><span><i class="fas fa-image text-purple-500 mr-2"></i>管理相册</span></h4><div id="admin-album-list" class="space-y-3 max-h-[400px] overflow-y-auto pr-2"></div></div>
                 </div>
-
-                <div class="text-center mt-8">
-                    <button onclick="logout()" class="text-red-400 hover:text-red-500 text-sm font-medium"><i class="fas fa-sign-out-alt mr-1"></i> 退出登录</button>
-                </div>
+                <div class="text-center mt-8"><button onclick="logout()" class="text-red-400 hover:text-red-500 text-sm font-medium"><i class="fas fa-sign-out-alt mr-1"></i> 退出登录</button></div>
             </div>
         </div>
     </main>
 
     <!-- 悬浮窗音乐播放器 -->
     <div id="music-widget" class="collapsed glass fixed right-4 bottom-20 cursor-pointer" onclick="toggleWidget(event)">
-        <div class="collapsed-icon text-blue-500 dark:text-blue-400 text-2xl flex items-center justify-center">
-            <i class="fas fa-music"></i>
-        </div>
+        <div class="collapsed-icon text-blue-500 dark:text-blue-400 text-2xl flex items-center justify-center"><i class="fas fa-music"></i></div>
         <div class="widget-content w-full">
-            <div class="widget-header flex justify-between items-center px-4 pt-4 pb-2">
-                <span class="text-xs font-bold text-gray-500 dark:text-gray-400 tracking-wider">CLOUD MUSIC</span>
-                <i class="fas fa-times cursor-pointer text-gray-400 hover:text-red-400 transition" onclick="toggleWidget(event)"></i>
-            </div>
-            <div class="px-1 pb-1">
-                <meting-js
-                    api="https://api.injahow.cn/meting/?server=:server&type=:type&id=:id"
-                    server="netease" type="playlist" id="3778678" 
-                    fixed="false" mini="false" autoplay="false" theme="#3b82f6" loop="all" order="list" preload="auto" mutex="true" lrc-type="0">
-                </meting-js>
-            </div>
+            <div class="widget-header flex justify-between items-center px-4 pt-4 pb-2"><span class="text-xs font-bold text-gray-500 dark:text-gray-400 tracking-wider">CLOUD MUSIC</span><i class="fas fa-times cursor-pointer text-gray-400 hover:text-red-400 transition" onclick="toggleWidget(event)"></i></div>
+            <div class="px-1 pb-1"><meting-js api="https://api.injahow.cn/meting/?server=:server&type=:type&id=:id" server="netease" type="playlist" id="3778678" fixed="false" mini="false" autoplay="false" theme="#3b82f6" loop="all" order="list" preload="auto" mutex="true" lrc-type="0"></meting-js></div>
         </div>
     </div>
 
     <script>
+        // ⚠️ 重要：在这里设置你的管理员 API 密钥（需与 Cloudflare 环境变量 ADMIN_TOKEN 保持一致，如果没有设置环境变量，默认是 my-secret-token-123）
+        const API_TOKEN = 'my-secret-token-123'; 
+        const authHeaders = { 'Authorization': `Bearer ${API_TOKEN}` };
+
         // ============================================================
         // 1. 悬浮球拖拽与吸附逻辑
         // ============================================================
-        const widget = document.getElementById('music-widget');
-        let isDragging = false;
-        let isMoved = false;
-        let startX, startY, startLeft, startTop;
-
+        const widget = document.getElementById('music-widget'); let isDragging = false; let isMoved = false; let startX, startY, startLeft, startTop;
         function getClientX(e) { return e.type.includes('mouse') ? e.clientX : e.touches[0].clientX; }
         function getClientY(e) { return e.type.includes('mouse') ? e.clientY : e.touches[0].clientY; }
-
         function dragStart(e) {
             if (e.target.closest('.widget-content') && !e.target.closest('.widget-header')) return;
-            isDragging = true; isMoved = false;
-            const clientX = getClientX(e);
-            const clientY = getClientY(e);
-            const rect = widget.getBoundingClientRect();
-            startX = clientX; startY = clientY;
-            startLeft = rect.left; startTop = rect.top;
-            widget.style.transition = 'none';
-            widget.style.right = 'auto'; widget.style.bottom = 'auto';
-            widget.style.left = startLeft + 'px'; widget.style.top = startTop + 'px';
+            isDragging = true; isMoved = false; const clientX = getClientX(e); const clientY = getClientY(e);
+            const rect = widget.getBoundingClientRect(); startX = clientX; startY = clientY; startLeft = rect.left; startTop = rect.top;
+            widget.style.transition = 'none'; widget.style.right = 'auto'; widget.style.bottom = 'auto'; widget.style.left = startLeft + 'px'; widget.style.top = startTop + 'px';
         }
-
         function dragMove(e) {
-            if (!isDragging) return;
-            const clientX = getClientX(e); const clientY = getClientY(e);
-            const dx = clientX - startX; const dy = clientY - startY;
-            if (Math.abs(dx) > 5 || Math.abs(dy) > 5) isMoved = true;
+            if (!isDragging) return; const clientX = getClientX(e); const clientY = getClientY(e);
+            const dx = clientX - startX; const dy = clientY - startY; if (Math.abs(dx) > 5 || Math.abs(dy) > 5) isMoved = true;
             let newLeft = startLeft + dx; let newTop = startTop + dy;
-            const maxX = window.innerWidth - widget.offsetWidth;
-            const maxY = window.innerHeight - widget.offsetHeight;
-            newLeft = Math.max(0, Math.min(newLeft, maxX));
-            newTop = Math.max(0, Math.min(newTop, maxY));
-            widget.style.left = newLeft + 'px'; widget.style.top = newTop + 'px';
-            if (e.cancelable) e.preventDefault();
+            const maxX = window.innerWidth - widget.offsetWidth; const maxY = window.innerHeight - widget.offsetHeight;
+            newLeft = Math.max(0, Math.min(newLeft, maxX)); newTop = Math.max(0, Math.min(newTop, maxY));
+            widget.style.left = newLeft + 'px'; widget.style.top = newTop + 'px'; if (e.cancelable) e.preventDefault();
         }
-
         function dragEnd(e) {
-            if (!isDragging) return;
-            isDragging = false;
-            widget.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-            const rect = widget.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            if (centerX < window.innerWidth / 2) {
-                widget.style.left = '20px';
-            } else {
-                widget.style.left = (window.innerWidth - rect.width - 20) + 'px';
-            }
+            if (!isDragging) return; isDragging = false; widget.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            const rect = widget.getBoundingClientRect(); const centerX = rect.left + rect.width / 2;
+            if (centerX < window.innerWidth / 2) { widget.style.left = '20px'; } else { widget.style.left = (window.innerWidth - rect.width - 20) + 'px'; }
         }
+        widget.addEventListener('mousedown', dragStart); document.addEventListener('mousemove', dragMove); document.addEventListener('mouseup', dragEnd);
+        widget.addEventListener('touchstart', dragStart, { passive: false }); document.addEventListener('touchmove', dragMove, { passive: false }); document.addEventListener('touchend', dragEnd);
 
-        widget.addEventListener('mousedown', dragStart);
-        document.addEventListener('mousemove', dragMove);
-        document.addEventListener('mouseup', dragEnd);
-        widget.addEventListener('touchstart', dragStart, { passive: false });
-        document.addEventListener('touchmove', dragMove, { passive: false });
-        document.addEventListener('touchend', dragEnd);
-
-        function toggleWidget(e) {
-            if (e) e.stopPropagation();
-            if (isMoved) return;
-            const widget = document.getElementById('music-widget');
-            if (widget.classList.contains('collapsed')) {
-                widget.classList.remove('collapsed'); widget.classList.add('expanded');
-            } else {
-                widget.classList.remove('expanded'); widget.classList.add('collapsed');
-            }
-        }
+        function toggleWidget(e) { if (e) e.stopPropagation(); if (isMoved) return; const widget = document.getElementById('music-widget'); if (widget.classList.contains('collapsed')) { widget.classList.remove('collapsed'); widget.classList.add('expanded'); } else { widget.classList.remove('expanded'); widget.classList.add('collapsed'); } }
 
         // ============================================================
-        // 2. 数据渲染逻辑
+        // 2. 数据渲染逻辑（骨架屏 + 懒加载 + 点赞 + 标签 + 嵌套评论）
         // ============================================================
         async function renderShuoshuo() {
             const container = document.getElementById('shuoshuo-list');
-            container.innerHTML = '<div class="glass rounded-2xl p-6 text-center text-gray-500">加载中...</div>';
+            // 骨架屏
+            container.innerHTML = Array(3).fill(`
+                <div class="glass rounded-2xl p-6"><div class="flex items-center space-x-3 mb-3"><div class="skeleton w-10 h-10 rounded-full"></div><div class="space-y-2"><div class="skeleton h-3 w-16"></div><div class="skeleton h-2 w-12"></div></div></div><div class="skeleton h-4 w-full mb-2"></div><div class="skeleton h-4 w-2/3"></div></div>
+            `).join('');
+            
             try {
-                const response = await fetch('/api/shuoshuo');
-                const data = await response.json();
+                const response = await fetch('/api/shuoshuo'); const data = await response.json();
                 if (data.length === 0) { container.innerHTML = '<div class="glass rounded-2xl p-6 text-center text-gray-500">暂无说说~</div>'; return; }
                 container.innerHTML = '';
                 data.forEach((item) => {
+                    // 解析标签
+                    let tagsHtml = '';
+                    if (item.tags) {
+                        item.tags.split(',').forEach(tag => { if(tag.trim()) tagsHtml += `<span class="text-[10px] bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 px-1.5 py-0.5 rounded-md mr-1">#${tag.trim()}</span>`; });
+                    }
+                    // 处理点赞状态
+                    const isLiked = localStorage.getItem(`liked-${item.id}`) === 'true';
+                    const heartClass = isLiked ? 'fas fa-heart text-red-500' : 'far fa-heart text-gray-400';
+
                     let html = `
                         <div class="glass rounded-2xl p-6 hover-lift">
                             <div class="flex items-center space-x-3 mb-3">
-                                <img src="https://q1.qlogo.cn/g?b=qq&nk=1779180196&s=100" referrerpolicy="no-referrer" class="w-10 h-10 rounded-full bg-white dark:bg-gray-800">
+                                <img src="https://q1.qlogo.cn/g?b=qq&nk=1779180196&s=100" referrerpolicy="no-referrer" class="w-10 h-10 rounded-full bg-white dark:bg-gray-800" loading="lazy">
                                 <div><div class="font-bold">北宇</div><div class="text-xs text-gray-500 dark:text-gray-400">${item.time}</div></div>
                             </div>
                             <p class="text-gray-700 dark:text-gray-300 text-sm mb-3 whitespace-pre-wrap">${item.text}</p>
+                            ${item.img ? `<img src="${item.img}" class="rounded-xl max-w-xs w-full object-cover mb-3" loading="lazy">` : ''}
+                            <div class="mb-2">${tagsHtml}</div>
+                            <div class="flex items-center gap-4 border-t border-gray-200 dark:border-gray-700 pt-3 mt-3 text-xs">
+                                <button onclick="toggleLike(${item.id})" class="flex items-center gap-1 hover:text-red-500 transition ${isLiked ? 'text-red-500' : 'text-gray-500'}">
+                                    <i id="heart-${item.id}" class="${heartClass}"></i> <span id="likes-${item.id}">${item.likes || 0}</span>
+                                </button>
+                                <button onclick="toggleComments(${item.id})" class="text-blue-500 hover:text-blue-700 flex items-center gap-1 transition"><i class="fas fa-comment"></i> 评论</button>
+                            </div>
+                            <div id="comments-${item.id}" class="hidden mt-3 space-y-3"></div>
+                        </div>
                     `;
-                    if (item.img) { html += `<img src="${item.img}" class="rounded-xl max-w-xs w-full object-cover mb-3">`; }
-                    html += `<div class="border-t border-gray-200 dark:border-gray-700 pt-3 mt-3"><button onclick="toggleComments(${item.id})" class="text-xs text-blue-500 hover:text-blue-700 flex items-center gap-1 transition"><i class="fas fa-comment"></i> 评论</button><div id="comments-${item.id}" class="hidden mt-3 space-y-3"></div></div></div>`;
                     container.innerHTML += html;
                 });
-            } catch (error) { container.innerHTML = '<div class="glass rounded-2xl p-6 text-center text-red-400">加载失败</div>'; }
+            } catch (error) { container.innerHTML = '<div class="glass rounded-2xl p-6 text-center text-red-400">加载失败，请稍后重试</div>'; }
+        }
+
+        async function toggleLike(id) {
+            const isLiked = localStorage.getItem(`liked-${id}`) === 'true';
+            const action = isLiked ? 'unlike' : 'like';
+            
+            // 乐观更新 UI
+            const heart = document.getElementById(`heart-${id}`);
+            const countSpan = document.getElementById(`likes-${id}`);
+            let count = parseInt(countSpan.innerText);
+            
+            if (isLiked) {
+                heart.className = 'far fa-heart text-gray-400'; countSpan.innerText = count - 1; localStorage.removeItem(`liked-${id}`);
+            } else {
+                heart.className = 'fas fa-heart text-red-500'; countSpan.innerText = count + 1; localStorage.setItem(`liked-${id}`, 'true');
+            }
+
+            // 发送请求
+            await fetch(`/api/shuoshuo?id=${id}&action=${action}`, { method: 'PATCH' });
         }
 
         async function toggleComments(id) {
@@ -414,89 +339,111 @@
 
         async function loadComments(shuoshuoId) {
             const container = document.getElementById(`comments-${shuoshuoId}`);
-            container.innerHTML = '<div class="text-xs text-gray-500 text-center py-2">加载评论中...</div>';
+            container.innerHTML = '<div class="skeleton h-10 w-full mb-2"></div><div class="skeleton h-10 w-full"></div>';
             try {
-                const res = await fetch(`/api/comments?shuoshuo_id=${shuoshuoId}`);
-                const data = await res.json();
+                const res = await fetch(`/api/comments?shuoshuo_id=${shuoshuoId}`); const data = await res.json();
                 let html = '';
                 if (data.length === 0) { html += `<div class="text-xs text-gray-500 text-center py-2">暂无评论，快来抢沙发吧！</div>`; }
                 else {
                     html += `<div class="space-y-2 mb-3">`;
                     data.forEach(c => {
-                        html += `<div class="bg-white/40 dark:bg-black/20 p-3 rounded-xl border border-white/50 dark:border-white/10"><div class="flex justify-between items-center mb-1"><span class="font-bold text-xs text-gray-700 dark:text-gray-300">${c.author}</span><span class="text-[10px] text-gray-400">${c.time}</span></div><p class="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap">${c.content}</p></div>`;
+                        // 如果有 parent_id，说明是回复
+                        const isReply = c.parent_id > 0;
+                        const marginClass = isReply ? 'ml-6 bg-white/20 dark:bg-black/10' : 'bg-white/40 dark:bg-black/20';
+                        html += `
+                            <div class="${marginClass} p-3 rounded-xl border border-white/50 dark:border-white/10">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="font-bold text-xs text-gray-700 dark:text-gray-300">${c.author} ${isReply ? '<i class="fas fa-reply text-[10px] text-gray-400 ml-1"></i>' : ''}</span>
+                                    <span class="text-[10px] text-gray-400">${c.time}</span>
+                                </div>
+                                <p class="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap">${c.content}</p>
+                                <button onclick="replyTo(${shuoshuoId}, ${c.id}, '${c.author.replace(/'/g, "\\'")}')" class="text-[10px] text-blue-500 hover:text-blue-700 mt-1 transition">回复</button>
+                            </div>
+                        `;
                     });
                     html += `</div>`;
                 }
                 const savedAuthor = localStorage.getItem('comment-author') || '';
-                html += `<div class="flex flex-col gap-2"><input type="text" id="comment-author-${shuoshuoId}" placeholder="你的昵称" value="${savedAuthor}" class="w-full glass border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-xs outline-none focus:border-blue-500 transition bg-transparent"><textarea id="comment-content-${shuoshuoId}" rows="2" placeholder="写下你的评论..." class="w-full glass border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-xs outline-none focus:border-blue-500 transition bg-transparent resize-none"></textarea><button onclick="submitComment(${shuoshuoId})" class="self-end bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-1.5 px-4 rounded-lg transition shadow-md">发表评论</button></div>`;
+                html += `<div class="flex flex-col gap-2"><input type="text" id="comment-author-${shuoshuoId}" placeholder="你的昵称" value="${savedAuthor}" class="w-full glass border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-xs outline-none focus:border-blue-500 transition bg-transparent"><textarea id="comment-content-${shuoshuoId}" rows="2" placeholder="写下你的评论..." class="w-full glass border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-xs outline-none focus:border-blue-500 transition bg-transparent resize-none"></textarea><button id="comment-submit-btn-${shuoshuoId}" onclick="submitComment(${shuoshuoId})" class="self-end bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-1.5 px-4 rounded-lg transition shadow-md">发表评论</button></div>`;
                 container.innerHTML = html;
             } catch (e) { container.innerHTML = '<div class="text-xs text-red-400 text-center py-2">评论加载失败</div>'; }
+        }
+
+        function replyTo(shuoshuoId, parentId, author) {
+            const contentInput = document.getElementById(`comment-content-${shuoshuoId}`);
+            contentInput.placeholder = `回复 @${author}：`;
+            contentInput.focus();
+            // 将 parent_id 挂在按钮上或者用一个全局变量
+            const btn = document.getElementById(`comment-submit-btn-${shuoshuoId}`);
+            btn.setAttribute('data-parent-id', parentId);
         }
 
         async function submitComment(shuoshuoId) {
             const authorInput = document.getElementById(`comment-author-${shuoshuoId}`);
             const contentInput = document.getElementById(`comment-content-${shuoshuoId}`);
+            const btn = document.getElementById(`comment-submit-btn-${shuoshuoId}`);
+            const parentId = btn.getAttribute('data-parent-id') || 0;
+
             const author = authorInput.value.trim(); const content = contentInput.value.trim();
-            if (!author) return alert('请输入你的昵称！');
-            if (!content) return alert('请输入评论内容！');
+            if (!author) return alert('请输入你的昵称！'); if (!content) return alert('请输入评论内容！');
             localStorage.setItem('comment-author', author);
-            const now = new Date();
-            const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+            const now = new Date(); const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
             try {
-                const res = await fetch('/api/comments', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ shuoshuo_id: shuoshuoId, author, content, time: timeStr }) });
-                if (res.ok) { contentInput.value = ''; await loadComments(shuoshuoId); } else { alert('评论失败，请重试'); }
+                const res = await fetch('/api/comments', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ shuoshuo_id: shuoshuoId, author, content, time: timeStr, parent_id: parentId }) });
+                if (res.ok) { contentInput.value = ''; contentInput.placeholder = '写下你的评论...'; btn.removeAttribute('data-parent-id'); await loadComments(shuoshuoId); } else { alert('评论失败，请重试'); }
             } catch (e) { alert('网络错误：' + e.message); }
         }
 
         async function renderAlbum() {
             const container = document.getElementById('album-list');
-            container.innerHTML = '<div class="glass rounded-2xl p-6 text-center text-gray-500 w-full col-span-3">加载中...</div>';
+            container.innerHTML = Array(6).fill('<div class="glass rounded-2xl overflow-hidden skeleton h-48 w-full break-inside-avoid"></div>').join('');
             try {
                 const response = await fetch('/api/album'); const data = await response.json();
                 if (data.length === 0) { container.innerHTML = '<div class="glass rounded-2xl p-6 text-center text-gray-500 w-full col-span-3">暂无照片~</div>'; return; }
                 container.innerHTML = '';
-                data.forEach((item) => { container.innerHTML += `<div class="glass rounded-2xl overflow-hidden hover-lift break-inside-avoid relative group"><img src="${item.src}" class="w-full" onerror="this.src='https://via.placeholder.com/400x300?text=Image+Error'"><div class="p-3 text-sm text-center text-gray-600 dark:text-gray-400">${item.desc}</div></div>`; });
+                data.forEach((item) => { container.innerHTML += `<div class="glass rounded-2xl overflow-hidden hover-lift break-inside-avoid relative group"><img src="${item.src}" class="w-full" loading="lazy" onerror="this.src='https://via.placeholder.com/400x300?text=Image+Error'"><div class="p-3 text-sm text-center text-gray-600 dark:text-gray-400">${item.desc}</div></div>`; });
             } catch (error) { container.innerHTML = '<div class="glass rounded-2xl p-6 text-center text-red-400 w-full col-span-3">加载失败</div>'; }
         }
 
+        // 后台渲染（带 Token 鉴权）
         async function renderAdminLists() {
             const adminShuoshuoContainer = document.getElementById('admin-shuoshuo-list');
-            adminShuoshuoContainer.innerHTML = '<div class="text-center text-gray-500 text-sm py-4">加载中...</div>';
+            adminShuoshuoContainer.innerHTML = '<div class="skeleton h-12 w-full mb-2"></div><div class="skeleton h-12 w-full mb-2"></div>';
             try {
                 const resShuoshuo = await fetch('/api/shuoshuo'); const dataShuoshuo = await resShuoshuo.json();
                 if (dataShuoshuo.length === 0) { adminShuoshuoContainer.innerHTML = '<div class="text-center text-gray-500 text-sm py-4">暂无说说</div>'; }
                 else {
                     adminShuoshuoContainer.innerHTML = '';
                     dataShuoshuo.forEach(item => {
-                        adminShuoshuoContainer.innerHTML += `<div class="flex justify-between items-center bg-white/40 dark:bg-black/30 p-3 rounded-xl border border-white/50 dark:border-white/10"><div class="flex-1 min-w-0 pr-3"><div class="text-xs text-gray-500 dark:text-gray-400 mb-1">${item.time}</div><div class="text-sm truncate">${item.text}</div></div><div class="flex gap-2 shrink-0"><button onclick="editShuoshuo(${item.id}, '${item.text.replace(/'/g, "\\'")}', '${item.img || ''}')" class="bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/50 dark:hover:bg-blue-900 text-blue-500 w-8 h-8 rounded-full flex items-center justify-center transition"><i class="fas fa-pen text-xs"></i></button><button onclick="deleteShuoshuo(${item.id})" class="bg-red-100 hover:bg-red-200 dark:bg-red-900/50 dark:hover:bg-red-900 text-red-500 w-8 h-8 rounded-full flex items-center justify-center transition"><i class="fas fa-trash-alt text-xs"></i></button></div></div>`;
+                        adminShuoshuoContainer.innerHTML += `<div class="flex justify-between items-center bg-white/40 dark:bg-black/30 p-3 rounded-xl border border-white/50 dark:border-white/10"><div class="flex-1 min-w-0 pr-3"><div class="text-xs text-gray-500 dark:text-gray-400 mb-1">${item.time}</div><div class="text-sm truncate">${item.text}</div></div><div class="flex gap-2 shrink-0"><button onclick="editShuoshuo(${item.id}, '${item.text.replace(/'/g, "\\'")}', '${item.img || ''}', '${item.tags || ''}')" class="bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/50 dark:hover:bg-blue-900 text-blue-500 w-8 h-8 rounded-full flex items-center justify-center transition"><i class="fas fa-pen text-xs"></i></button><button onclick="deleteShuoshuo(${item.id})" class="bg-red-100 hover:bg-red-200 dark:bg-red-900/50 dark:hover:bg-red-900 text-red-500 w-8 h-8 rounded-full flex items-center justify-center transition"><i class="fas fa-trash-alt text-xs"></i></button></div></div>`;
                     });
                 }
             } catch(e) { adminShuoshuoContainer.innerHTML = '<div class="text-center text-red-400 text-sm py-4">加载失败</div>'; }
 
             const adminAlbumContainer = document.getElementById('admin-album-list');
-            adminAlbumContainer.innerHTML = '<div class="text-center text-gray-500 text-sm py-4">加载中...</div>';
+            adminAlbumContainer.innerHTML = '<div class="skeleton h-12 w-full mb-2"></div><div class="skeleton h-12 w-full mb-2"></div>';
             try {
                 const resAlbum = await fetch('/api/album'); const dataAlbum = await resAlbum.json();
                 if (dataAlbum.length === 0) { adminAlbumContainer.innerHTML = '<div class="text-center text-gray-500 text-sm py-4">暂无图片</div>'; }
                 else {
                     adminAlbumContainer.innerHTML = '';
                     dataAlbum.forEach(item => {
-                        adminAlbumContainer.innerHTML += `<div class="flex items-center gap-3 bg-white/40 dark:bg-black/30 p-2 rounded-xl border border-white/50 dark:border-white/10"><img src="${item.src}" class="w-10 h-10 rounded-lg object-cover shrink-0" onerror="this.src='https://via.placeholder.com/100?text=Img'"><div class="flex-1 min-w-0"><div class="text-sm truncate">${item.desc}</div></div><div class="flex gap-2 shrink-0"><button onclick="editAlbum(${item.id}, '${item.src}', '${item.desc.replace(/'/g, "\\'")}')" class="bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/50 dark:hover:bg-blue-900 text-blue-500 w-8 h-8 rounded-full flex items-center justify-center transition"><i class="fas fa-pen text-xs"></i></button><button onclick="deleteAlbum(${item.id})" class="bg-red-100 hover:bg-red-200 dark:bg-red-900/50 dark:hover:bg-red-900 text-red-500 w-8 h-8 rounded-full flex items-center justify-center transition"><i class="fas fa-trash-alt text-xs"></i></button></div></div>`;
+                        adminAlbumContainer.innerHTML += `<div class="flex items-center gap-3 bg-white/40 dark:bg-black/30 p-2 rounded-xl border border-white/50 dark:border-white/10"><img src="${item.src}" class="w-10 h-10 rounded-lg object-cover shrink-0" loading="lazy" onerror="this.src='https://via.placeholder.com/100?text=Img'"><div class="flex-1 min-w-0"><div class="text-sm truncate">${item.desc}</div></div><div class="flex gap-2 shrink-0"><button onclick="editAlbum(${item.id}, '${item.src}', '${item.desc.replace(/'/g, "\\'")}')" class="bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/50 dark:hover:bg-blue-900 text-blue-500 w-8 h-8 rounded-full flex items-center justify-center transition"><i class="fas fa-pen text-xs"></i></button><button onclick="deleteAlbum(${item.id})" class="bg-red-100 hover:bg-red-200 dark:bg-red-900/50 dark:hover:bg-red-900 text-red-500 w-8 h-8 rounded-full flex items-center justify-center transition"><i class="fas fa-trash-alt text-xs"></i></button></div></div>`;
                     });
                 }
             } catch(e) { adminAlbumContainer.innerHTML = '<div class="text-center text-red-400 text-sm py-4">加载失败</div>'; }
         }
 
         // ============================================================
-        // 3. 编辑与更新逻辑
+        // 3. 编辑与提交逻辑
         // ============================================================
-        function editShuoshuo(id, text, img) {
-            document.getElementById('edit-shuoshuo-id').value = id; document.getElementById('new-shuoshuo-text').value = text; document.getElementById('new-shuoshuo-img').value = img;
+        function editShuoshuo(id, text, img, tags) {
+            document.getElementById('edit-shuoshuo-id').value = id; document.getElementById('new-shuoshuo-text').value = text; document.getElementById('new-shuoshuo-img').value = img; document.getElementById('new-shuoshuo-tags').value = tags;
             document.getElementById('shuoshuo-form-title').innerText = '修改说说'; document.getElementById('shuoshuo-submit-btn').innerText = '保存修改'; document.getElementById('cancel-shuoshuo-btn').classList.remove('hidden');
             window.scrollTo({top: 0, behavior: 'smooth'});
         }
         function cancelEditShuoshuo() {
-            document.getElementById('edit-shuoshuo-id').value = ''; document.getElementById('new-shuoshuo-text').value = ''; document.getElementById('new-shuoshuo-img').value = '';
+            document.getElementById('edit-shuoshuo-id').value = ''; document.getElementById('new-shuoshuo-text').value = ''; document.getElementById('new-shuoshuo-img').value = ''; document.getElementById('new-shuoshuo-tags').value = '';
             document.getElementById('shuoshuo-form-title').innerText = '发布说说'; document.getElementById('shuoshuo-submit-btn').innerText = '立即发布'; document.getElementById('cancel-shuoshuo-btn').classList.add('hidden');
         }
         function editAlbum(id, src, desc) {
@@ -510,11 +457,12 @@
         }
 
         async function submitShuoshuo() {
-            const id = document.getElementById('edit-shuoshuo-id').value; const text = document.getElementById('new-shuoshuo-text').value.trim(); const img = document.getElementById('new-shuoshuo-img').value.trim();
+            const id = document.getElementById('edit-shuoshuo-id').value; const text = document.getElementById('new-shuoshuo-text').value.trim(); const img = document.getElementById('new-shuoshuo-img').value.trim(); const tags = document.getElementById('new-shuoshuo-tags').value.trim();
             if (!text) return alert('请输入说说内容');
             const now = new Date(); const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-            const method = id ? 'PUT' : 'POST'; const bodyData = id ? { id, text, img: img || null } : { text, img: img || null, time: timeStr };
-            await fetch('/api/shuoshuo', { method: method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(bodyData) });
+            const method = id ? 'PUT' : 'POST'; const bodyData = id ? { id, text, img: img || null, tags } : { text, img: img || null, time: timeStr, tags };
+            const res = await fetch('/api/shuoshuo', { method: method, headers: { 'Content-Type': 'application/json', ...authHeaders }, body: JSON.stringify(bodyData) });
+            if (!res.ok && res.status === 403) return alert('鉴权失败，请检查 API_TOKEN 是否与后端一致！');
             alert(id ? '修改成功！' : '发布成功！'); cancelEditShuoshuo(); renderAdminLists(); renderShuoshuo();
         }
 
@@ -522,15 +470,16 @@
             const id = document.getElementById('edit-album-id').value; const img = document.getElementById('new-album-img').value.trim(); const desc = document.getElementById('new-album-desc').value.trim();
             if (!img) return alert('请输入图片链接');
             const method = id ? 'PUT' : 'POST'; const bodyData = id ? { id, src: img, desc: desc || '未命名图片' } : { src: img, desc: desc || '未命名图片' };
-            await fetch('/api/album', { method: method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(bodyData) });
+            const res = await fetch('/api/album', { method: method, headers: { 'Content-Type': 'application/json', ...authHeaders }, body: JSON.stringify(bodyData) });
+            if (!res.ok && res.status === 403) return alert('鉴权失败！');
             alert(id ? '修改成功！' : '添加成功！'); cancelEditAlbum(); renderAdminLists(); renderAlbum();
         }
 
-        async function deleteShuoshuo(id) { if(!confirm('确定删除这条说说吗？')) return; await fetch(`/api/shuoshuo?id=${id}`, { method: 'DELETE' }); alert('删除成功！'); renderAdminLists(); renderShuoshuo(); }
-        async function deleteAlbum(id) { if(!confirm('确定删除这张照片吗？')) return; await fetch(`/api/album?id=${id}`, { method: 'DELETE' }); alert('删除成功！'); renderAdminLists(); renderAlbum(); }
+        async function deleteShuoshuo(id) { if(!confirm('确定删除这条说说吗？')) return; const res = await fetch(`/api/shuoshuo?id=${id}`, { method: 'DELETE', headers: authHeaders }); if(res.status === 403) return alert('无权操作'); alert('删除成功！'); renderAdminLists(); renderShuoshuo(); }
+        async function deleteAlbum(id) { if(!confirm('确定删除这张照片吗？')) return; const res = await fetch(`/api/album?id=${id}`, { method: 'DELETE', headers: authHeaders }); if(res.status === 403) return alert('无权操作'); alert('删除成功！'); renderAdminLists(); renderAlbum(); }
 
         // ============================================================
-        // 4. 后台管理逻辑
+        // 4. 后台登录、设置与统计
         // ============================================================
         function handleLogin() {
             const user = document.getElementById('admin-username').value; const pass = document.getElementById('admin-password').value;
@@ -538,24 +487,31 @@
                 document.getElementById('admin-login').classList.add('hidden'); document.getElementById('admin-main').classList.remove('hidden'); renderAdminLists(); alert('登录成功！');
             } else { alert('账号或密码错误！'); }
         }
-        function logout() {
-            document.getElementById('admin-login').classList.remove('hidden'); document.getElementById('admin-main').classList.add('hidden');
-            document.getElementById('admin-username').value = ''; document.getElementById('admin-password').value = ''; cancelEditShuoshuo(); cancelEditAlbum(); switchTab('home');
-        }
+        function logout() { document.getElementById('admin-login').classList.remove('hidden'); document.getElementById('admin-main').classList.add('hidden'); document.getElementById('admin-username').value = ''; document.getElementById('admin-password').value = ''; cancelEditShuoshuo(); cancelEditAlbum(); switchTab('home'); }
 
-        // ============================================================
-        // 5. 设置逻辑与一言
-        // ============================================================
         async function loadSiteSettings() {
             try { const resName = await fetch('/api/settings?key=site_name'); const dataName = await resName.json(); if (dataName && dataName.value) { document.getElementById('site-name-display').textContent = dataName.value; } } catch(e) {}
             try { const resOp = await fetch('/api/settings?key=card_opacity'); const dataOp = await resOp.json(); if (dataOp && dataOp.value) { document.documentElement.style.setProperty('--card-opacity', dataOp.value); document.getElementById('setting-opacity').value = Math.round(dataOp.value * 100); document.getElementById('opacity-value').textContent = Math.round(dataOp.value * 100) + '%'; } } catch(e) {}
         }
         document.getElementById('setting-opacity').addEventListener('input', (e) => { document.getElementById('opacity-value').textContent = e.target.value + '%'; document.documentElement.style.setProperty('--card-opacity', e.target.value / 100); });
-        async function saveSiteName() { const url = document.getElementById('setting-site-name').value.trim(); if (!url) return alert('请输入站点名称！'); await fetch('/api/settings?key=site_name', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ value: url }) }); alert('站点名称保存成功！'); document.getElementById('site-name-display').textContent = url; }
-        async function saveOpacity() { const val = document.getElementById('setting-opacity').value / 100; await fetch('/api/settings?key=card_opacity', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ value: val }) }); alert('透明度保存成功！'); }
+        async function saveSiteName() { const url = document.getElementById('setting-site-name').value.trim(); if (!url) return alert('请输入站点名称！'); await fetch('/api/settings?key=site_name', { method: 'PUT', headers: { 'Content-Type': 'application/json', ...authHeaders }, body: JSON.stringify({ value: url }) }); alert('站点名称保存成功！'); document.getElementById('site-name-display').textContent = url; }
+        async function saveOpacity() { const val = document.getElementById('setting-opacity').value / 100; await fetch('/api/settings?key=card_opacity', { method: 'PUT', headers: { 'Content-Type': 'application/json', ...authHeaders }, body: JSON.stringify({ value: val }) }); alert('透明度保存成功！'); }
         async function loadBackground() { try { const res = await fetch('/api/settings?key=background_image'); const data = await res.json(); if (data && data.value) { document.documentElement.style.setProperty('--custom-bg', `url('${data.value}')`); } } catch(e) {} }
-        async function saveBgSetting() { const url = document.getElementById('setting-bg-url').value.trim(); if (!url) return alert('请输入图片链接！'); await fetch('/api/settings?key=background_image', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ value: url }) }); alert('背景图保存成功！'); document.getElementById('setting-bg-url').value = ''; loadBackground(); }
-        async function deleteBgSetting() { if (!confirm('确定要恢复默认背景图吗？')) return; await fetch('/api/settings?key=background_image', { method: 'DELETE' }); alert('已恢复默认背景！'); document.documentElement.style.removeProperty('--custom-bg'); }
+        async function saveBgSetting() { const url = document.getElementById('setting-bg-url').value.trim(); if (!url) return alert('请输入图片链接！'); await fetch('/api/settings?key=background_image', { method: 'PUT', headers: { 'Content-Type': 'application/json', ...authHeaders }, body: JSON.stringify({ value: url }) }); alert('背景图保存成功！'); document.getElementById('setting-bg-url').value = ''; loadBackground(); }
+        async function deleteBgSetting() { if (!confirm('确定要恢复默认背景图吗？')) return; await fetch('/api/settings?key=background_image', { method: 'DELETE', headers: authHeaders }); alert('已恢复默认背景！'); document.documentElement.style.removeProperty('--custom-bg'); }
+
+        // 访问统计
+        async function recordVisit() {
+            try {
+                const res = await fetch('/api/stats', { method: 'POST' });
+                if (res.ok) {
+                    const data = await fetch('/api/stats').then(r => r.json());
+                    const el = document.getElementById('visit-count');
+                    el.textContent = `访问量: ${data.count}`;
+                    el.classList.remove('hidden');
+                }
+            } catch(e) {}
+        }
 
         function fetchHitokoto() {
             const textElement = document.getElementById('hitokoto-text'); if (!textElement) return;
@@ -570,9 +526,6 @@
             if (viewName === 'shuoshuo') renderShuoshuo(); if (viewName === 'album') renderAlbum(); if (viewName === 'admin') renderAdminLists();
         }
 
-        // ============================================================
-        // 6. 其他交互逻辑
-        // ============================================================
         const htmlEl = document.documentElement; const themeToggleIcon = document.getElementById('theme-toggle');
         function applyTheme(isDark) { if (isDark) { htmlEl.classList.add('dark'); themeToggleIcon.classList.replace('fa-moon', 'fa-sun'); localStorage.setItem('blog-theme', 'dark'); } else { htmlEl.classList.remove('dark'); themeToggleIcon.classList.replace('fa-sun', 'fa-moon'); localStorage.setItem('blog-theme', 'light'); } }
         (function initTheme() { const saved = localStorage.getItem('blog-theme'); if (saved === 'dark') applyTheme(true); else if (saved === 'light') applyTheme(false); else applyTheme(window.matchMedia('(prefers-color-scheme: dark)').matches); })();
@@ -584,7 +537,7 @@
         document.addEventListener('click', (e) => { if (!settingsPanel.contains(e.target) && !settingsBtn.contains(e.target)) settingsPanel.classList.add('hidden-panel'); });
 
         document.addEventListener('DOMContentLoaded', () => {
-            loadSiteSettings(); loadBackground(); fetchHitokoto(); renderShuoshuo(); renderAlbum();
+            loadSiteSettings(); loadBackground(); fetchHitokoto(); renderShuoshuo(); renderAlbum(); recordVisit();
         });
     </script>
 </body>
