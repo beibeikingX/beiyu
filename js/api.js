@@ -40,6 +40,13 @@ const api = {
         update: (data) => request('/api/articles', { method: 'PUT', headers: { 'Content-Type': 'application/json', ...authHeaders }, body: JSON.stringify(data) }),
         delete: (id) => request(`/api/articles?id=${id}`, { method: 'DELETE', headers: authHeaders })
     },
+    // 友链
+links: {
+    getAll: () => request('/api/links'),
+    add: (data) => request('/api/links', { method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders }, body: JSON.stringify(data) }),
+    update: (data) => request('/api/links', { method: 'PUT', headers: { 'Content-Type': 'application/json', ...authHeaders }, body: JSON.stringify(data) }),
+    delete: (id) => request(`/api/links?id=${id}`, { method: 'DELETE', headers: authHeaders })
+},
     // 评论
     comments: {
         getByShuoshuo: (shuoshuo_id) => request(`/api/comments?shuoshuo_id=${shuoshuo_id}`),
