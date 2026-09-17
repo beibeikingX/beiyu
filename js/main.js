@@ -16,7 +16,7 @@ function switchTab(viewName) {
     // 强制容错：如果传入的是 articleDetail，自动纠正为 article-detail
     if (viewName === 'articleDetail') viewName = 'article-detail';
 
-    const views = ['home', 'articles', 'article-detail', 'shuoshuo', 'album', 'admin'];
+    const views = ['home', 'articles', 'article-detail', 'shuoshuo', 'album', 'links', 'admin'];
     
     // 隐藏所有视图
     views.forEach(v => {
@@ -36,9 +36,11 @@ function switchTab(viewName) {
     
     window.scrollTo({top: 0, behavior: 'smooth'});
 
+    // 按需渲染数据
     if (viewName === 'articles') renderArticles();
     if (viewName === 'shuoshuo') renderShuoshuo();
     if (viewName === 'album') renderAlbum();
+    if (viewName === 'links') renderLinks();
     if (viewName === 'admin' && typeof renderAdminLists === 'function') renderAdminLists(); 
 }
 
@@ -140,10 +142,8 @@ async function renderArticles() {
 }
 
 async function openArticle(id) {
-    // 确保切换到正确的视图 ID
     switchTab('article-detail');
     
-    // 设置加载状态
     document.getElementById('detail-title').innerText = '加载中...';
     document.getElementById('detail-content').innerHTML = '<div class="skeleton h-64 w-full"></div>';
     document.getElementById('detail-time').innerText = '';
@@ -169,7 +169,6 @@ async function openArticle(id) {
     }
     document.getElementById('detail-tags').innerHTML = tagsHtml;
 
-    // Markdown 渲染（带容错）
     try {
         if (typeof marked !== 'undefined' && marked.parse) {
             document.getElementById('detail-content').innerHTML = marked.parse(data.content || '');
@@ -177,11 +176,9 @@ async function openArticle(id) {
                 document.querySelectorAll('#detail-content pre code').forEach((block) => { hljs.highlightElement(block); });
             }
         } else {
-            // 如果 marked 没加载出来，直接显示纯文本，防止页面空白
             document.getElementById('detail-content').innerText = data.content || '（无内容）';
         }
     } catch (e) {
-        // 即使渲染失败，也保底显示原始内容
         document.getElementById('detail-content').innerHTML = `<div class="text-red-500 mb-4">⚠️ 渲染出错：${e.message}</div><pre class="whitespace-pre-wrap">${data.content || ''}</pre>`;
     }
 }
@@ -327,7 +324,32 @@ async function renderAlbum() {
 }
 
 // ============================================================
-// 6. 悬浮球拖拽与吸附
+// 6. 友链渲染逻辑
+// ============================================================
+async function renderLinks() {
+    const container = document.getElementById('links-list');
+    container.innerHTML = '<div class="glass rounded-2xl p-6 text-center text-gray-500 w-full col-span-3">加载中...</div>';
+    
+    const res = await api.links.getAll();
+    if (!res.success) { container.innerHTML = '<div class="glass rounded-2xl p-6 text-center text-red-400 w-full col-span-3">加载失败</div>'; return; }
+    
+    const data = res.data;
+    if (data.length === 0) { container.innerHTML = '<div class="glass rounded-2xl p-6 text-center text-gray-500 w-full col-span-3">暂无友链，去后台添加吧~</div>'; return; }
+    
+    container.innerHTML = '';
+    data.forEach(item => {
+        container.innerHTML += `
+            <a href="${item.url}" target="_blank" class="glass rounded-2xl p-6 flex flex-col items-center justify-center hover-lift transition text-center group">
+                <img src="${item.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + item.name}" class="w-16 h-16 rounded-full mb-3 object-cover bg-white dark:bg-gray-800" loading="lazy" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=fallback'">
+                <h4 class="font-bold text-lg text-gray-800 dark:text-gray-100 group-hover:text-orange-500 transition">${item.name}</h4>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 line-clamp-2">${item.description || '这个站长很懒，什么都没写~'}</p>
+            </a>
+        `;
+    });
+}
+
+// ============================================================
+// 7. 悬浮球拖拽与吸附
 // ============================================================
 const widget = document.getElementById('music-widget'); 
 let isDragging = false; 
@@ -387,60 +409,4 @@ function toggleWidget(e) {
     } else { 
         widget.classList.remove('expanded'); widget.classList.add('collapsed'); 
     } 
-}
-// ============================================================
-// 8. 友链增删改查
-// ============================================================
-function editLink(id, name, url, avatar, desc) {
-    document.getElementById('edit-link-id').value = id;
-    document.getElementById('new-link-name').value = name;
-    document.getElementById('new-link-url').value = url;
-    document.getElementById('new-link-avatar').value = avatar;
-    document.getElementById('new-link-desc').value = desc;
-    document.getElementById('link-form-title').innerText = '修改友链';
-    document.getElementById('link-submit-btn').innerText = '保存修改';
-    document.getElementById('cancel-link-btn').classList.remove('hidden');
-    window.scrollTo({top: 0, behavior: 'smooth'});
-}
-
-function cancelEditLink() {
-    document.getElementById('edit-link-id').value = '';
-    document.getElementById('new-link-name').value = '';
-    document.getElementById('new-link-url').value = '';
-    document.getElementById('new-link-avatar').value = '';
-    document.getElementById('new-link-desc').value = '';
-    document.getElementById('link-form-title').innerText = '添加友情链接';
-    document.getElementById('link-submit-btn').innerText = '添加友链';
-    document.getElementById('cancel-link-btn').classList.add('hidden');
-}
-
-async function submitLink() {
-    const id = document.getElementById('edit-link-id').value;
-    const name = document.getElementById('new-link-name').value.trim();
-    const url = document.getElementById('new-link-url').value.trim();
-    const avatar = document.getElementById('new-link-avatar').value.trim();
-    const description = document.getElementById('new-link-desc').value.trim();
-    if (!name || !url) return alert('名称和链接不能为空');
-    
-    let res;
-    if (id) {
-        res = await api.links.update({ id, name, url, avatar, description });
-    } else {
-        res = await api.links.add({ name, url, avatar, description });
-    }
-    
-    if (res.success) {
-        alert(id ? '修改成功！' : '添加成功！'); 
-        cancelEditLink(); 
-        renderAdminLists(); 
-    } else {
-        alert('操作失败：' + res.error);
-    }
-}
-
-async function deleteLink(id) {
-    if(!confirm('确定删除这个友链吗？')) return;
-    const res = await api.links.delete(id);
-    if (res.success) { alert('删除成功！'); renderAdminLists(); }
-    else { alert('删除失败：' + res.error); }
 }
