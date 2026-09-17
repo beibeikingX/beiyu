@@ -31,6 +31,7 @@
             <a href="#" onclick="switchTab('articles')" class="hover:text-blue-500 transition">文章</a>
             <a href="#" onclick="switchTab('shuoshuo')" class="hover:text-blue-500 transition">说说</a>
             <a href="#" onclick="switchTab('album')" class="hover:text-blue-500 transition">相册</a>
+            <a href="#" onclick="switchTab('links')" class="hover:text-blue-500 transition">友链</a>
         </div>
         <div class="flex space-x-4 items-center relative">
             <i id="theme-toggle" class="fas fa-moon cursor-pointer hover:text-blue-500 text-lg transition-colors"></i>
@@ -144,6 +145,15 @@
             <div id="album-list" class="columns-1 sm:columns-2 md:columns-3 gap-4 space-y-4"></div>
         </div>
 
+        <!-- 友链视图 -->
+        <div id="links-view" class="hidden">
+            <div class="flex items-center gap-4 mb-6">
+                <button onclick="switchTab('home')" class="glass px-4 py-2 rounded-full flex items-center gap-2 hover:bg-white dark:hover:bg-gray-700 transition text-sm text-gray-600 dark:text-gray-300"><i class="fas fa-arrow-left"></i> 返回首页</button>
+                <h3 class="text-xl font-bold pl-2 border-l-4 border-orange-500">友情链接</h3>
+            </div>
+            <div id="links-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"></div>
+        </div>
+
         <!-- 后台管理视图 -->
         <div id="admin-view" class="hidden">
             <div class="flex items-center gap-4 mb-6">
@@ -223,11 +233,25 @@
                     </div>
                 </div>
 
+                <!-- 友链添加区 -->
+                <div class="glass rounded-3xl p-6 mt-8">
+                    <h4 class="font-bold mb-4 flex items-center justify-between"><span><i class="fas fa-link text-orange-500 mr-2"></i><span id="link-form-title">添加友情链接</span></span><button id="cancel-link-btn" onclick="cancelEditLink()" class="hidden text-xs bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded-full">取消编辑</button></h4>
+                    <input type="hidden" id="edit-link-id" value="">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                        <input type="text" id="new-link-name" placeholder="网站名称 (必填)" class="w-full glass border border-gray-300 dark:border-gray-600 rounded-xl px-3 py-2 outline-none focus:border-orange-500 transition bg-transparent">
+                        <input type="url" id="new-link-url" placeholder="网站链接 (必填，如 https://...)" class="w-full glass border border-gray-300 dark:border-gray-600 rounded-xl px-3 py-2 outline-none focus:border-orange-500 transition bg-transparent">
+                        <input type="url" id="new-link-avatar" placeholder="头像链接 (可选)" class="w-full glass border border-gray-300 dark:border-gray-600 rounded-xl px-3 py-2 outline-none focus:border-orange-500 transition bg-transparent">
+                        <input type="text" id="new-link-desc" placeholder="网站描述 (可选)" class="w-full glass border border-gray-300 dark:border-gray-600 rounded-xl px-3 py-2 outline-none focus:border-orange-500 transition bg-transparent">
+                    </div>
+                    <button id="link-submit-btn" onclick="submitLink()" class="bg-orange-500 hover:bg-orange-600 text-white font-bold px-6 py-2 rounded-xl transition">添加友链</button>
+                </div>
+
                 <h4 class="font-bold mt-10 mb-4 pl-2 border-l-4 border-red-500 flex items-center"><i class="fas fa-tasks mr-2"></i>内容管理</h4>
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
                     <div class="glass rounded-3xl p-6"><h4 class="font-bold mb-4 flex items-center justify-between"><span><i class="fas fa-book text-green-500 mr-2"></i>管理文章</span></h4><div id="admin-article-list" class="space-y-3 max-h-[400px] overflow-y-auto pr-2"></div></div>
                     <div class="glass rounded-3xl p-6"><h4 class="font-bold mb-4 flex items-center justify-between"><span><i class="fas fa-comment text-blue-500 mr-2"></i>管理说说</span></h4><div id="admin-shuoshuo-list" class="space-y-3 max-h-[400px] overflow-y-auto pr-2"></div></div>
                     <div class="glass rounded-3xl p-6"><h4 class="font-bold mb-4 flex items-center justify-between"><span><i class="fas fa-image text-purple-500 mr-2"></i>管理相册</span></h4><div id="admin-album-list" class="space-y-3 max-h-[400px] overflow-y-auto pr-2"></div></div>
+                    <div class="glass rounded-3xl p-6"><h4 class="font-bold mb-4 flex items-center justify-between"><span><i class="fas fa-link text-orange-500 mr-2"></i>管理友链</span></h4><div id="admin-link-list" class="space-y-3 max-h-[400px] overflow-y-auto pr-2"></div></div>
                 </div>
                 <div class="text-center mt-8"><button onclick="logout()" class="text-red-400 hover:text-red-500 text-sm font-medium"><i class="fas fa-sign-out-alt mr-1"></i> 退出登录</button></div>
             </div>
@@ -249,9 +273,9 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
 
-    <!-- 引入拆分好的脚本（加上版本号防止缓存） -->
-    <script src="js/api.js?v=3"></script>
-    <script src="js/main.js?v=3"></script>
-    <script src="js/admin.js?v=3"></script>
+    <!-- 引入拆分好的脚本（版本号提升到 v=4，防止缓存） -->
+    <script src="js/api.js?v=4"></script>
+    <script src="js/main.js?v=4"></script>
+    <script src="js/admin.js?v=4"></script>
 </body>
 </html>
