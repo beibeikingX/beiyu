@@ -388,3 +388,59 @@ function toggleWidget(e) {
         widget.classList.remove('expanded'); widget.classList.add('collapsed'); 
     } 
 }
+// ============================================================
+// 8. 友链增删改查
+// ============================================================
+function editLink(id, name, url, avatar, desc) {
+    document.getElementById('edit-link-id').value = id;
+    document.getElementById('new-link-name').value = name;
+    document.getElementById('new-link-url').value = url;
+    document.getElementById('new-link-avatar').value = avatar;
+    document.getElementById('new-link-desc').value = desc;
+    document.getElementById('link-form-title').innerText = '修改友链';
+    document.getElementById('link-submit-btn').innerText = '保存修改';
+    document.getElementById('cancel-link-btn').classList.remove('hidden');
+    window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function cancelEditLink() {
+    document.getElementById('edit-link-id').value = '';
+    document.getElementById('new-link-name').value = '';
+    document.getElementById('new-link-url').value = '';
+    document.getElementById('new-link-avatar').value = '';
+    document.getElementById('new-link-desc').value = '';
+    document.getElementById('link-form-title').innerText = '添加友情链接';
+    document.getElementById('link-submit-btn').innerText = '添加友链';
+    document.getElementById('cancel-link-btn').classList.add('hidden');
+}
+
+async function submitLink() {
+    const id = document.getElementById('edit-link-id').value;
+    const name = document.getElementById('new-link-name').value.trim();
+    const url = document.getElementById('new-link-url').value.trim();
+    const avatar = document.getElementById('new-link-avatar').value.trim();
+    const description = document.getElementById('new-link-desc').value.trim();
+    if (!name || !url) return alert('名称和链接不能为空');
+    
+    let res;
+    if (id) {
+        res = await api.links.update({ id, name, url, avatar, description });
+    } else {
+        res = await api.links.add({ name, url, avatar, description });
+    }
+    
+    if (res.success) {
+        alert(id ? '修改成功！' : '添加成功！'); 
+        cancelEditLink(); 
+        renderAdminLists(); 
+    } else {
+        alert('操作失败：' + res.error);
+    }
+}
+
+async function deleteLink(id) {
+    if(!confirm('确定删除这个友链吗？')) return;
+    const res = await api.links.delete(id);
+    if (res.success) { alert('删除成功！'); renderAdminLists(); }
+    else { alert('删除失败：' + res.error); }
+}
